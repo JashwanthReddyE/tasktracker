@@ -1,0 +1,11 @@
+# Local task data — personal/work content, never commit
+tasks.json
+
+# Build artifacts
+tasktracker.exe
+tasktracker
+*.exe
+
+# OS junk
+Thumbs.db
+.DS_Store
