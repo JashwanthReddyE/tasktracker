@@ -1,9 +1,13 @@
-# Local task data — personal/work content, never commit
+# Local task data. The database now lives in the OS app-data directory by
+# default, so these are backstops in case someone points TASKTRACKER_DB here.
 tasks.json
+*.db
+*.db-wal
+*.db-shm
 
 # Build artifacts
-tasktracker.exe
 tasktracker
+tasktracker.exe
 *.exe
 
 # OS junk

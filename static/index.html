@@ -1049,9 +1049,90 @@ select.field, input[type="date"].field { cursor: pointer; color-scheme: var(--cs
   font-family: inherit; transition: opacity 0.12s;
 }
 .btn-add:hover { opacity: 0.88; }
+
+/* ── Auth ── */
+#auth-wrap {
+  position: fixed; inset: 0; z-index: 200;
+  display: none; align-items: center; justify-content: center;
+  background: var(--bg); padding: 24px; overflow-y: auto;
+}
+#auth-wrap.show { display: flex; }
+/* The board is hidden until /api/me confirms a session, so a signed-out
+   visitor never sees an empty board flash before the login form. */
+#app { visibility: hidden; }
+#app.ready { visibility: visible; }
+
+.auth-card {
+  width: 100%; max-width: 340px;
+  background: var(--s1); border: 1px solid var(--b1);
+  border-radius: 12px; padding: 28px 26px;
+}
+.auth-brand {
+  font-size: 17px; font-weight: 700; letter-spacing: -0.02em;
+  color: var(--t1); margin-bottom: 4px;
+}
+.auth-brand span { color: var(--t2); font-weight: 400; }
+.auth-sub { font-size: 12px; color: var(--t2); margin-bottom: 22px; }
+.auth-field { margin-bottom: 12px; }
+.auth-field label {
+  display: block; font-size: 10px; font-weight: 600; letter-spacing: 0.07em;
+  text-transform: uppercase; color: var(--t2); margin-bottom: 5px;
+}
+.auth-field input {
+  width: 100%; padding: 9px 11px; border-radius: 7px;
+  border: 1px solid var(--b2); background: var(--s3); color: var(--t1);
+  font-size: 13px; font-family: inherit; outline: none; transition: border-color 0.12s;
+}
+.auth-field input:focus { border-color: var(--b3); }
+.auth-submit {
+  width: 100%; padding: 10px; margin-top: 6px; border: none; border-radius: 7px;
+  background: var(--t1); color: var(--bg); font-size: 12px; font-weight: 700;
+  letter-spacing: 0.04em; font-family: inherit; cursor: pointer; transition: opacity 0.12s;
+}
+.auth-submit:hover:not(:disabled) { opacity: 0.88; }
+.auth-submit:disabled { opacity: 0.5; cursor: default; }
+.auth-msg {
+  font-size: 12px; color: var(--high); margin-top: 12px;
+  min-height: 16px; line-height: 1.4;
+}
+.auth-toggle { font-size: 12px; color: var(--t2); margin-top: 16px; text-align: center; }
+.auth-toggle button {
+  background: none; border: none; padding: 0; font: inherit;
+  color: var(--t1); cursor: pointer; text-decoration: underline;
+}
+.auth-hint { font-size: 11px; color: var(--t3); margin-top: 18px; text-align: center; line-height: 1.5; }
+
+.account-btn {
+  padding: 5px 10px; border-radius: 6px; border: 1px solid var(--b2);
+  background: transparent; color: var(--t2); font-size: 11px;
+  cursor: pointer; font-family: inherit; transition: all 0.12s;
+  max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.account-btn:hover { background: var(--b1); color: var(--t1); }
 </style>
 </head>
 <body>
+<div id="auth-wrap">
+  <div class="auth-card">
+    <div class="auth-brand">Tasks<span>studio</span></div>
+    <div class="auth-sub" id="auth-sub">Sign in to your board.</div>
+    <form id="auth-form" autocomplete="on">
+      <div class="auth-field">
+        <label for="auth-email">Email</label>
+        <input type="email" id="auth-email" autocomplete="username" required />
+      </div>
+      <div class="auth-field">
+        <label for="auth-password">Password</label>
+        <input type="password" id="auth-password" autocomplete="current-password" required />
+      </div>
+      <button type="submit" class="auth-submit" id="auth-submit">Sign in</button>
+    </form>
+    <div class="auth-msg" id="auth-msg"></div>
+    <div class="auth-toggle" id="auth-toggle"></div>
+    <div class="auth-hint">Your tasks are private to your account and sync across every browser you sign in from.</div>
+  </div>
+</div>
+
 <div id="app">
   <div class="topbar">
     <span class="brand">Tasks<span class="brand-sub">studio</span></span>
@@ -1075,6 +1156,7 @@ select.field, input[type="date"].field { cursor: pointer; color-scheme: var(--cs
     <button class="archived-btn" id="archived-btn" title="Toggle archived tasks">Archived</button>
     <button class="theme-btn" id="theme-btn">Light</button>
     <button class="reset-btn" id="reset-btn" title="Clear all tasks and categories">Clear board</button>
+    <button class="account-btn" id="account-btn" title="Sign out"></button>
   </div>
   <div class="today-banner" id="today-banner"></div>
   <div class="main-area">
@@ -1183,7 +1265,11 @@ const personBg = (hue) => theme === 'light'
 function makeInitials(name) {
   return name.trim().split(/\s+/).map(w => w[0].toUpperCase()).slice(0, 2).join('');
 }
-function persistPeople() { localStorage.setItem('tt-people', JSON.stringify(allPeople)); }
+// People and categories are server-side state: they must travel with the
+// account, or a second browser shows an empty board even though the tasks are
+// all there. Both are whole-collection PUTs because every mutation below
+// re-serializes the entire structure anyway.
+function persistPeople() { api('PUT', '/api/people', allPeople); }
 function savePeople() { allPeople[activeCat] = people; persistPeople(); }
 function reloadPeople() { people = allPeople[activeCat] || []; }
 function nextHue() {
@@ -1192,22 +1278,16 @@ function nextHue() {
 }
 
 // ── State ─────────────────────────────────────────────
+// Only theme and the active tab stay in localStorage: they are per-browser UI
+// preference, not data, so two browsers may sit on different tabs. Everything
+// else is loaded from the server in bootstrap().
 let theme     = localStorage.getItem('tt-theme') || 'dark';
 let tasks     = [];
-let allPeople = (() => {
-  const raw = localStorage.getItem('tt-people');
-  if (!raw) return {};
-  const parsed = JSON.parse(raw);
-  if (Array.isArray(parsed)) {
-    // Migrate old flat array: assign people to whichever category was active
-    const cat = localStorage.getItem('tt-cat') || '';
-    return (cat && parsed.length > 0) ? { [cat]: parsed } : {};
-  }
-  return parsed;
-})();
-let cats      = JSON.parse(localStorage.getItem('tt-cats') || 'null') || DEFAULT_CATS;
-let activeCat = localStorage.getItem('tt-cat') || cats[0]?.id || '';
-let people    = allPeople[activeCat] || [];
+let allPeople = {};
+let cats      = DEFAULT_CATS.slice(); // copy: cats is mutated in place by adds/deletes
+let activeCat = '';
+let people    = [];
+let me        = null;
 let selectedId     = null;
 let drawerTask     = null;
 let addRow         = 'todo';
@@ -1224,7 +1304,7 @@ let filterPerson   = null;
 let showArchived   = false;
 let dragOverId     = null;
 
-function saveCats() { localStorage.setItem('tt-cats', JSON.stringify(cats)); }
+function saveCats() { api('PUT', '/api/cats', cats); }
 
 // ── Toast / Undo ──────────────────────────────────────
 let _toastTimer = null;
@@ -1297,9 +1377,16 @@ function confirmDelete(anchorEl, message, onConfirm) {
 
 // ── API ───────────────────────────────────────────────
 async function api(method, path, body) {
-  const opts = { method, headers: {} };
+  const opts = { method, headers: {}, credentials: 'same-origin' };
   if (body) { opts.headers['Content-Type'] = 'application/json'; opts.body = JSON.stringify(body); }
   const r = await fetch(path, opts);
+  // A session can expire or be revoked from another device at any time, so
+  // every call is a possible logout. Bounce to the sign-in screen rather than
+  // letting the board silently stop saving.
+  if (r.status === 401 && !path.startsWith('/api/login') && !path.startsWith('/api/signup')) {
+    showAuth();
+    return null;
+  }
   if (r.status === 204) return null;
   try { return await r.json(); } catch { return null; }
 }
@@ -1308,6 +1395,75 @@ async function loadTasks() {
   const data = await api('GET', '/api/tasks');
   tasks = Array.isArray(data) ? data : [];
   render();
+}
+
+// ── Bootstrap ─────────────────────────────────────────
+// Startup is async now: nothing can render until the server says who we are
+// and hands back this account's tasks, categories and people.
+async function bootstrap() {
+  const who = await api('GET', '/api/me');
+  if (!who || !who.email) { showAuth(); return; }
+  me = who;
+
+  const [t, c, p] = await Promise.all([
+    api('GET', '/api/tasks'),
+    api('GET', '/api/cats'),
+    api('GET', '/api/people'),
+  ]);
+  tasks     = Array.isArray(t) ? t : [];
+  cats      = Array.isArray(c) ? c : [];
+  allPeople = (p && typeof p === 'object') ? p : {};
+
+  await migrateLocalStorage();
+
+  // Prefer the tab this browser was last on, but only if it still exists on
+  // the account -- categories may have been deleted from another device.
+  const remembered = localStorage.getItem('tt-cat') || '';
+  activeCat = cats.some(c => c.id === remembered) ? remembered : (cats[0]?.id || '');
+  people    = allPeople[activeCat] || [];
+
+  document.getElementById('account-btn').textContent = me.email;
+  hideAuth();
+  render();
+}
+
+// One-time upload of data from the pre-account version, which kept categories
+// and people in this browser only. Each is checked independently: an imported
+// board already has categories but no people, and that case must still sync.
+async function migrateLocalStorage() {
+  // A successful PUT is 204, which api() reports as null. Anything with an
+  // .error field failed, and the local copy must survive so the next reload
+  // can retry -- this data exists nowhere else.
+  const ok = res => !(res && res.error);
+
+  await migrateKey('tt-cats', cats.length === 0, raw => {
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed) || !parsed.length) return null;
+    return { value: parsed, put: async v => { cats = v; return ok(await api('PUT', '/api/cats', v)); } };
+  });
+
+  await migrateKey('tt-people', Object.keys(allPeople).length === 0, raw => {
+    let parsed = JSON.parse(raw);
+    // Very old builds stored a flat array rather than a per-category map.
+    if (Array.isArray(parsed)) {
+      const cat = localStorage.getItem('tt-cat') || cats[0]?.id || '';
+      parsed = (cat && parsed.length) ? { [cat]: parsed } : {};
+    }
+    if (!parsed || !Object.keys(parsed).length) return null;
+    return { value: parsed, put: async v => { allPeople = v; return ok(await api('PUT', '/api/people', v)); } };
+  });
+}
+
+async function migrateKey(key, serverIsEmpty, prepare) {
+  const raw = localStorage.getItem(key);
+  if (!raw) return;
+  if (!serverIsEmpty) { localStorage.removeItem(key); return; } // server wins; local copy is stale
+
+  let plan = null;
+  try { plan = prepare(raw); } catch { localStorage.removeItem(key); return; } // unparseable, discard
+  if (!plan) { localStorage.removeItem(key); return; }
+
+  if (await plan.put(plan.value)) localStorage.removeItem(key);
 }
 
 // ── Helpers ───────────────────────────────────────────
@@ -2643,10 +2799,10 @@ applyTheme();
 
 document.getElementById('reset-btn').onclick = async () => {
   if (!confirm('Clear all tasks and categories? This cannot be undone.')) return;
+  // The server clears tasks, categories and people for this account; only the
+  // remembered tab is still a local concern.
   await api('POST', '/api/reset');
-  localStorage.removeItem('tt-cats');
   localStorage.removeItem('tt-cat');
-  localStorage.removeItem('tt-people');
   tasks     = [];
   cats      = [];
   allPeople = {};
@@ -2661,7 +2817,79 @@ document.getElementById('reset-btn').onclick = async () => {
   render();
 };
 
-loadTasks();
+// ── Auth screen ───────────────────────────────────────
+let authMode = 'login';
+
+const authWrap   = document.getElementById('auth-wrap');
+const authForm   = document.getElementById('auth-form');
+const authEmail  = document.getElementById('auth-email');
+const authPass   = document.getElementById('auth-password');
+const authSubmit = document.getElementById('auth-submit');
+const authMsg    = document.getElementById('auth-msg');
+const authSub    = document.getElementById('auth-sub');
+const authToggle = document.getElementById('auth-toggle');
+
+function renderAuthMode() {
+  const signup = authMode === 'signup';
+  authSub.textContent      = signup ? 'Create an account to get started.' : 'Sign in to your board.';
+  authSubmit.textContent   = signup ? 'Create account' : 'Sign in';
+  authPass.autocomplete    = signup ? 'new-password' : 'current-password';
+  authToggle.innerHTML     = '';
+  authToggle.append(signup ? 'Already have an account? ' : 'No account yet? ');
+  const b = document.createElement('button');
+  b.type = 'button';
+  b.textContent = signup ? 'Sign in' : 'Create one';
+  b.onclick = () => { authMode = signup ? 'login' : 'signup'; authMsg.textContent = ''; renderAuthMode(); };
+  authToggle.appendChild(b);
+}
+
+function showAuth() {
+  me = null;
+  authWrap.classList.add('show');
+  document.getElementById('app').classList.remove('ready');
+  authMsg.textContent = '';
+  renderAuthMode();
+  authEmail.focus();
+}
+
+function hideAuth() {
+  authWrap.classList.remove('show');
+  document.getElementById('app').classList.add('ready');
+}
+
+authForm.onsubmit = async e => {
+  e.preventDefault();
+  const email    = authEmail.value.trim();
+  const password = authPass.value;
+  if (!email || !password) return;
+
+  authSubmit.disabled = true;
+  authMsg.textContent = '';
+  try {
+    const res = await api('POST', authMode === 'signup' ? '/api/signup' : '/api/login', { email, password });
+    if (!res || res.error) {
+      authMsg.textContent = (res && res.error) || 'Something went wrong. Try again.';
+      return;
+    }
+    authPass.value = '';
+    await bootstrap();
+  } catch {
+    authMsg.textContent = 'Could not reach the server.';
+  } finally {
+    authSubmit.disabled = false;
+  }
+};
+
+document.getElementById('account-btn').onclick = async () => {
+  if (!confirm('Sign out?')) return;
+  await api('POST', '/api/logout');
+  // Drop in-memory state so the next account cannot briefly see this one's board.
+  tasks = []; cats = []; allPeople = {}; people = []; activeCat = '';
+  selectedId = null; drawerTask = null; selectedPeople = [];
+  showAuth();
+};
+
+bootstrap();
 </script>
 </body>
 </html>
