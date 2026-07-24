@@ -67,7 +67,7 @@ func main() {
 		srv.Shutdown(ctx)
 	}()
 
-	log.Printf("Task Tracker → http://localhost%s", cfg.Addr)
+	log.Printf("Task Tracker → http://127.0.0.1%s", cfg.Addr)
 	log.Printf("database: %s", cfg.DBPath)
 	if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 		log.Fatal(err)

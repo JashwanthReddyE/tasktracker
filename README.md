@@ -23,7 +23,7 @@ cd tasktracker
 go run .
 ```
 
-Open <http://localhost:8080>, create an account, and you're in.
+Open <http://127.0.0.1:8899>, create an account, and you're in.
 
 To build a standalone binary:
 
@@ -42,7 +42,7 @@ All configuration is via environment variables.
 
 | Variable | Default | Purpose |
 |---|---|---|
-| `PORT` | `8080` | Port to listen on. A bare number or `:8080` both work. |
+| `PORT` | `8899` | Port to listen on. A bare number or `:8899` both work. |
 | `TASKTRACKER_DB` | see below | Path to the SQLite database file. Parent directories are created automatically. |
 | `SESSION_SECURE` | auto | Force the `Secure` flag on session cookies. Normally unnecessary — see below. |
 
@@ -74,11 +74,11 @@ A minimal Caddy config:
 
 ```
 tasks.example.com {
-    reverse_proxy localhost:8080
+    reverse_proxy 127.0.0.1:8899
 }
 ```
 
-Then run the binary with `PORT=8080` and a `TASKTRACKER_DB` on persistent storage. On container hosts with ephemeral disks (Fly.io, Render, Railway), point `TASKTRACKER_DB` at a mounted volume or the database is lost on redeploy.
+Then run the binary with `PORT=8899` and a `TASKTRACKER_DB` on persistent storage. On container hosts with ephemeral disks (Fly.io, Render, Railway), point `TASKTRACKER_DB` at a mounted volume or the database is lost on redeploy.
 
 Because SQLite is a single file owned by one process, run **one** instance — this app does not support multiple replicas behind a load balancer. For the workload it's built for, one instance is plenty.
 

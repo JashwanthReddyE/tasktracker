@@ -11,7 +11,7 @@ import (
 // Config holds every runtime knob. Everything is env-driven so the binary can
 // be dropped onto a host without a config file.
 type Config struct {
-	Addr        string // listen address, e.g. ":8080"
+	Addr        string // listen address, e.g. ":8899"
 	DBPath      string // absolute path to the SQLite file
 	ForceSecure bool   // always mark session cookies Secure, even if the request looks plaintext
 }
@@ -35,7 +35,7 @@ func defaultDBPath() string {
 
 func loadConfig() Config {
 	c := Config{
-		Addr:   ":8080",
+		Addr:   ":8899",
 		DBPath: defaultDBPath(),
 	}
 
