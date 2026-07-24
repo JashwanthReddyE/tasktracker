@@ -1281,7 +1281,7 @@ function nextHue() {
 // Only theme and the active tab stay in localStorage: they are per-browser UI
 // preference, not data, so two browsers may sit on different tabs. Everything
 // else is loaded from the server in bootstrap().
-let theme     = localStorage.getItem('tt-theme') || 'dark';
+let theme     = localStorage.getItem('tt-theme') || 'light';
 let tasks     = [];
 let allPeople = {};
 let cats      = DEFAULT_CATS.slice(); // copy: cats is mutated in place by adds/deletes
