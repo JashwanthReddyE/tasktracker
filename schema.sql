@@ -8,7 +8,10 @@ CREATE TABLE IF NOT EXISTS users (
     id           INTEGER PRIMARY KEY AUTOINCREMENT,
     email        TEXT    NOT NULL UNIQUE COLLATE NOCASE,
     display_name TEXT    NOT NULL DEFAULT '',
-    created_at   TEXT    NOT NULL
+    created_at   TEXT    NOT NULL,
+    -- Free-form JSON blob of per-account UI state (e.g. the last active
+    -- category tab), so a session resumes where it left off on any device.
+    prefs        TEXT    NOT NULL DEFAULT '{}'
 );
 
 -- One row per way of signing in. Password login is stored as

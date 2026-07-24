@@ -89,6 +89,7 @@ func (a *app) routes() http.Handler {
 	mux.HandleFunc("/api/tasks/", jsonHeader(a.requireAuth(a.taskHandler)))
 	mux.HandleFunc("/api/cats", jsonHeader(a.requireAuth(a.catsHandler)))
 	mux.HandleFunc("/api/people", jsonHeader(a.requireAuth(a.peopleHandler)))
+	mux.HandleFunc("/api/prefs", jsonHeader(a.requireAuth(a.prefsHandler)))
 	mux.HandleFunc("/api/reset", jsonHeader(a.requireAuth(a.resetHandler)))
 
 	mux.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
@@ -301,6 +302,46 @@ func (a *app) peopleHandler(w http.ResponseWriter, r *http.Request) {
 		if err := replacePeople(a.db, uid, people); err != nil {
 			log.Printf("replace people: %v", err)
 			writeErr(w, http.StatusInternalServerError, "could not save people")
+			return
+		}
+		w.WriteHeader(http.StatusNoContent)
+
+	default:
+		writeErr(w, http.StatusMethodNotAllowed, "method not allowed")
+	}
+}
+
+// prefsHandler reads and writes the account's UI-state blob (currently the last
+// active category tab). The body is stored verbatim as JSON after being decoded
+// once to reject anything that is not a JSON object.
+func (a *app) prefsHandler(w http.ResponseWriter, r *http.Request) {
+	uid := userID(r)
+
+	switch r.Method {
+	case http.MethodGet:
+		p, err := getPrefs(a.db, uid)
+		if err != nil {
+			log.Printf("get prefs: %v", err)
+			writeErr(w, http.StatusInternalServerError, "could not load preferences")
+			return
+		}
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte(p))
+
+	case http.MethodPut:
+		var obj map[string]any
+		if err := json.NewDecoder(http.MaxBytesReader(w, r.Body, 16<<10)).Decode(&obj); err != nil {
+			writeErr(w, http.StatusBadRequest, "invalid request body")
+			return
+		}
+		raw, err := json.Marshal(obj)
+		if err != nil {
+			writeErr(w, http.StatusBadRequest, "invalid preferences")
+			return
+		}
+		if err := setPrefs(a.db, uid, string(raw)); err != nil {
+			log.Printf("set prefs: %v", err)
+			writeErr(w, http.StatusInternalServerError, "could not save preferences")
 			return
 		}
 		w.WriteHeader(http.StatusNoContent)

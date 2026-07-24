@@ -1288,6 +1288,7 @@ let cats      = DEFAULT_CATS.slice(); // copy: cats is mutated in place by adds/
 let activeCat = '';
 let people    = [];
 let me        = null;
+let prefs     = {};   // account-level UI state (e.g. last active tab), synced to the server
 let selectedId     = null;
 let drawerTask     = null;
 let addRow         = 'todo';
@@ -1305,6 +1306,18 @@ let showArchived   = false;
 let dragOverId     = null;
 
 function saveCats() { api('PUT', '/api/cats', cats); }
+
+// The active tab is remembered per account so a session resumes on the same
+// tab from any device. localStorage is kept as an instant-restore cache; the
+// server write is debounced so rapid tab-clicking doesn't spam the API.
+let _prefsSaveTimer = null;
+function saveActiveCat(id) {
+  activeCat = id;
+  localStorage.setItem('tt-cat', id);
+  prefs.activeCat = id;
+  clearTimeout(_prefsSaveTimer);
+  _prefsSaveTimer = setTimeout(() => api('PUT', '/api/prefs', prefs), 400);
+}
 
 // ── Toast / Undo ──────────────────────────────────────
 let _toastTimer = null;
@@ -1404,6 +1417,7 @@ async function bootstrap() {
   const who = await api('GET', '/api/me');
   if (!who || !who.email) { showAuth(); return; }
   me = who;
+  prefs = (who.prefs && typeof who.prefs === 'object') ? who.prefs : {};
 
   const [t, c, p] = await Promise.all([
     api('GET', '/api/tasks'),
@@ -1416,11 +1430,17 @@ async function bootstrap() {
 
   await migrateLocalStorage();
 
-  // Prefer the tab this browser was last on, but only if it still exists on
-  // the account -- categories may have been deleted from another device.
-  const remembered = localStorage.getItem('tt-cat') || '';
+  // Restore the last active tab. The account-level pref (prefs.activeCat) is
+  // the source of truth so the tab follows the user across browsers/devices;
+  // the localStorage value is only a fallback for a first login after this
+  // feature shipped. Either way, fall back to the first tab if the remembered
+  // category no longer exists (it may have been deleted from another device).
+  const remembered = prefs.activeCat || localStorage.getItem('tt-cat') || '';
   activeCat = cats.some(c => c.id === remembered) ? remembered : (cats[0]?.id || '');
   people    = allPeople[activeCat] || [];
+  // Seed the server pref if it was empty (first login post-feature) so the
+  // fallback localStorage value is promoted to the durable account state.
+  if (activeCat && prefs.activeCat !== activeCat) saveActiveCat(activeCat);
 
   document.getElementById('account-btn').textContent = me.email;
   hideAuth();
@@ -1634,8 +1654,7 @@ function renderCats() {
     b.className = 'cat-btn' + (c.id === activeCat ? ' active' : '');
     b.textContent = c.label;
     b.onclick = () => {
-      activeCat = c.id;
-      localStorage.setItem('tt-cat', c.id);
+      saveActiveCat(c.id);
       reloadPeople();
       selectedId   = null;
       expandedRow  = null;
@@ -1658,8 +1677,7 @@ function renderCats() {
         delete allPeople[c.id];
         persistPeople();
         if (activeCat === c.id) {
-          activeCat = cats[0]?.id || '';
-          localStorage.setItem('tt-cat', activeCat);
+          saveActiveCat(cats[0]?.id || '');
           reloadPeople();
         }
         filterPerson = null;
@@ -1670,8 +1688,7 @@ function renderCats() {
           saveCats();
           if (snapCatPeople !== undefined) allPeople[c.id] = snapCatPeople;
           persistPeople();
-          activeCat = snapActive;
-          localStorage.setItem('tt-cat', activeCat);
+          saveActiveCat(snapActive);
           reloadPeople();
           render();
         });
@@ -1696,8 +1713,7 @@ function renderCats() {
         if (!cats.find(c => c.id === id)) {
           cats.push({ id, label });
           saveCats();
-          activeCat = id;
-          localStorage.setItem('tt-cat', id);
+          saveActiveCat(id);
           reloadPeople();
         }
       }
@@ -2803,6 +2819,8 @@ document.getElementById('reset-btn').onclick = async () => {
   // remembered tab is still a local concern.
   await api('POST', '/api/reset');
   localStorage.removeItem('tt-cat');
+  prefs = {};
+  api('PUT', '/api/prefs', prefs);   // drop the now-dangling active-tab pref
   tasks     = [];
   cats      = [];
   allPeople = {};
@@ -2884,7 +2902,7 @@ document.getElementById('account-btn').onclick = async () => {
   if (!confirm('Sign out?')) return;
   await api('POST', '/api/logout');
   // Drop in-memory state so the next account cannot briefly see this one's board.
-  tasks = []; cats = []; allPeople = {}; people = []; activeCat = '';
+  tasks = []; cats = []; allPeople = {}; people = []; activeCat = ''; prefs = {};
   selectedId = null; drawerTask = null; selectedPeople = [];
   showAuth();
 };

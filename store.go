@@ -339,6 +339,26 @@ func replacePeople(db *sql.DB, userID int64, people map[string][]Person) error {
 	})
 }
 
+// ── Preferences ───────────────────────────────────────
+
+// getPrefs returns the user's UI-state JSON blob, defaulting to an empty object
+// so callers never have to special-case a freshly created account.
+func getPrefs(db *sql.DB, userID int64) (string, error) {
+	var p string
+	if err := db.QueryRow(`SELECT prefs FROM users WHERE id=?`, userID).Scan(&p); err != nil {
+		return "{}", err
+	}
+	if p == "" {
+		return "{}", nil
+	}
+	return p, nil
+}
+
+func setPrefs(db *sql.DB, userID int64, prefs string) error {
+	_, err := db.Exec(`UPDATE users SET prefs=? WHERE id=?`, prefs, userID)
+	return err
+}
+
 // ── Reset ─────────────────────────────────────────────
 
 // resetUser clears one user's board. Tasks cascade to task_people and events

@@ -254,13 +254,19 @@ func (a *app) handleLogout(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *app) handleMe(w http.ResponseWriter, r *http.Request) {
-	var email, display string
-	if err := a.db.QueryRow(`SELECT email, display_name FROM users WHERE id=?`,
-		userID(r)).Scan(&email, &display); err != nil {
+	var email, display, prefs string
+	if err := a.db.QueryRow(`SELECT email, display_name, prefs FROM users WHERE id=?`,
+		userID(r)).Scan(&email, &display, &prefs); err != nil {
 		writeErr(w, http.StatusUnauthorized, "not signed in")
 		return
 	}
-	writeJSON(w, http.StatusOK, map[string]any{"email": email, "displayName": display})
+	if prefs == "" {
+		prefs = "{}"
+	}
+	// prefs is stored JSON; emit it as a nested object, not a quoted string.
+	writeJSON(w, http.StatusOK, map[string]any{
+		"email": email, "displayName": display, "prefs": json.RawMessage(prefs),
+	})
 }
 
 // ── Validation helpers ────────────────────────────────

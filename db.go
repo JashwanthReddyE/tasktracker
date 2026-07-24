@@ -54,7 +54,28 @@ func openDB(path string) (*sql.DB, error) {
 		db.Close()
 		return nil, fmt.Errorf("apply schema: %w", err)
 	}
+	if err := migrate(db); err != nil {
+		db.Close()
+		return nil, fmt.Errorf("migrate: %w", err)
+	}
 	return db, nil
+}
+
+// migrate applies column additions that CREATE TABLE IF NOT EXISTS cannot make
+// to a database that predates them. SQLite has no ADD COLUMN IF NOT EXISTS, so
+// each statement runs unconditionally and a "duplicate column" error — meaning
+// it was already applied — is treated as success.
+func migrate(db *sql.DB) error {
+	stmts := []string{
+		`ALTER TABLE users ADD COLUMN prefs TEXT NOT NULL DEFAULT '{}'`,
+	}
+	for _, s := range stmts {
+		if _, err := db.Exec(s); err != nil &&
+			!strings.Contains(strings.ToLower(err.Error()), "duplicate column") {
+			return err
+		}
+	}
+	return nil
 }
 
 // tx runs fn inside a transaction, rolling back on error or panic. Multi-table
