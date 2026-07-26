@@ -3,12 +3,11 @@ export interface Category {
   label: string;
   position: number;
 }
-export interface Person {
+export interface Profile {
   id: string;
-  category_id: string;
   name: string;
+  email: string;
   hue: number;
-  position: number;
 }
 export interface Event {
   id: string;
@@ -27,6 +26,6 @@ export interface Task {
   created_at: string;
   archived: boolean;
   position: number;
-  task_people: { person_id: string }[];
+  task_assignments: { user_id: string }[];
   events: Event[];
 }

@@ -1,6 +1,6 @@
 <script lang="ts">
   import { enhance } from '$app/forms';
-  import type { Category, Person } from '$lib/types';
+  import type { Category, Profile } from '$lib/types';
   
   let { 
     isOpen = $bindable(), 
@@ -13,10 +13,9 @@
     status: string;
     categoryId: string;
     categories: Category[];
-    people: Person[];
+    people: Profile[];
   }>();
 
-  let categoryPeople = $derived(people.filter(p => p.category_id === categoryId));
   let selectedPeople = $state<string[]>([]);
   
   function togglePerson(id: string) {
@@ -80,11 +79,11 @@
           </div>
         </div>
 
-        {#if categoryPeople.length > 0}
+        {#if people.length > 0}
           <div>
             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Assign People</label>
-            <div class="flex flex-wrap gap-2">
-              {#each categoryPeople as person}
+            <div class="flex flex-wrap gap-2 max-h-32 overflow-y-auto p-1">
+              {#each people as person}
                 <button 
                   type="button"
                   class="flex items-center gap-2 px-2 py-1 rounded-full border text-xs font-medium transition-colors {selectedPeople.includes(person.id) ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300' : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-500 text-gray-600 dark:text-gray-400'}"

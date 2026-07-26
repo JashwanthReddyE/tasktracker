@@ -1,7 +1,7 @@
 <script lang="ts">
-  import type { Task } from '$lib/types';
+  import type { Task, Profile } from '$lib/types';
 
-  let { task } = $props<{ task: Task }>();
+  let { task, people } = $props<{ task: Task; people: Profile[] }>();
 
   function handleDragStart(e: DragEvent) {
     if (e.dataTransfer) {
@@ -46,10 +46,13 @@
     {/if}
     
     <div class="ml-auto flex -space-x-1.5">
-      {#each task.task_people as tp}
-        <div class="w-5 h-5 rounded-full bg-blue-500 border border-white dark:border-[#1c1c26] shadow-sm flex items-center justify-center text-[8px] font-bold text-white z-0">
-          U
-        </div>
+      {#each task.task_assignments || [] as ta}
+        {@const person = people.find(p => p.id === ta.user_id)}
+        {#if person}
+          <div class="w-5 h-5 rounded-full border border-white dark:border-[#1c1c26] shadow-sm flex items-center justify-center text-[8px] font-bold text-white z-0" style="background-color: hsl({person.hue}, 65%, 55%)" title={person.name}>
+            {person.name.charAt(0).toUpperCase()}
+          </div>
+        {/if}
       {/each}
     </div>
   </div>

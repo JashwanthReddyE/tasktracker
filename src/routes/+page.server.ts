@@ -8,35 +8,32 @@ export const load: PageServerLoad = async ({ locals: { supabase, safeGetSession 
     throw redirect(303, '/login')
   }
 
-  // Load tasks with their people assignments and events
+  // Load tasks with their assignments and events
   const { data: tasks, error: tasksError } = await supabase
     .from('tasks')
-    .select('*, task_people(*), events(*)')
-    .eq('user_id', user.id)
+    .select('*, task_assignments(*), events(*)')
     .order('position', { ascending: true })
 
   // Load categories
   const { data: categories, error: catsError } = await supabase
     .from('categories')
     .select('*')
-    .eq('user_id', user.id)
     .order('position', { ascending: true })
 
-  // Load people
-  const { data: people, error: peopleError } = await supabase
-    .from('people')
+  // Load all profiles (global directory)
+  const { data: profiles, error: profilesError } = await supabase
+    .from('profiles')
     .select('*')
-    .eq('user_id', user.id)
-    .order('position', { ascending: true })
+    .order('name', { ascending: true })
 
   if (tasksError) console.error('Error loading tasks:', tasksError)
   if (catsError) console.error('Error loading cats:', catsError)
-  if (peopleError) console.error('Error loading people:', peopleError)
+  if (profilesError) console.error('Error loading profiles:', profilesError)
 
   return {
     tasks: tasks ?? [],
     categories: categories ?? [],
-    people: people ?? [],
+    people: profiles ?? [],
   }
 }
 
@@ -75,15 +72,14 @@ export const actions: Actions = {
 
     if (error) return fail(500, { error: error.message })
 
-    // Insert task_people
+    // Insert task_assignments
     if (peopleIds.length > 0) {
-      const taskPeople = peopleIds.map((personId: string, index: number) => ({
+      const taskAssignments = peopleIds.map((personId: string) => ({
         task_id: task.id,
-        user_id: user.id,
-        person_id: personId,
-        position: index,
+        user_id: personId, // the assignee
+        assigned_by: user.id, // the assigner
       }))
-      await supabase.from('task_people').insert(taskPeople)
+      await supabase.from('task_assignments').insert(taskAssignments)
     }
 
     return { success: true, task }
@@ -121,19 +117,20 @@ export const actions: Actions = {
 
     if (error) return fail(500, { error: error.message })
 
-    // Optional: update people and events if provided
+    // Update assignments
     const peopleIdsJson = formData.get('people_ids') as string
     if (peopleIdsJson) {
       const peopleIds = JSON.parse(peopleIdsJson)
-      await supabase.from('task_people').delete().eq('task_id', id).eq('user_id', user.id)
+      // Delete old assignments
+      await supabase.from('task_assignments').delete().eq('task_id', id)
+      
       if (peopleIds.length > 0) {
-        const taskPeople = peopleIds.map((personId: string, index: number) => ({
+        const taskAssignments = peopleIds.map((personId: string) => ({
           task_id: id,
-          user_id: user.id,
-          person_id: personId,
-          position: index,
+          user_id: personId,
+          assigned_by: user.id,
         }))
-        await supabase.from('task_people').insert(taskPeople)
+        await supabase.from('task_assignments').insert(taskAssignments)
       }
     }
 
@@ -174,40 +171,6 @@ export const actions: Actions = {
         position: i
       }))
       const { error } = await supabase.from('categories').insert(inserts)
-      if (error) return fail(500, { error: error.message })
-    }
-    return { success: true }
-  },
-
-  replacePeople: async ({ request, locals: { supabase, user } }) => {
-    if (!user) return fail(401, { error: 'Unauthorized' })
-    const formData = await request.formData()
-    const peopleJson = formData.get('people') as string
-    // expects { [categoryId]: Person[] }
-    const peopleMap = JSON.parse(peopleJson || '{}')
-
-    // Delete existing
-    await supabase.from('people').delete().eq('user_id', user.id)
-
-    // Insert new
-    const inserts = []
-    for (const catId of Object.keys(peopleMap)) {
-      const list = peopleMap[catId]
-      for (let i = 0; i < list.length; i++) {
-        const p = list[i]
-        inserts.push({
-          user_id: user.id,
-          id: p.id,
-          category_id: catId,
-          name: p.name,
-          hue: p.hue || 220,
-          position: i
-        })
-      }
-    }
-    
-    if (inserts.length > 0) {
-      const { error } = await supabase.from('people').insert(inserts)
       if (error) return fail(500, { error: error.message })
     }
     return { success: true }
