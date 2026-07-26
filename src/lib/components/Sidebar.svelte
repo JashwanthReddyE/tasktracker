@@ -11,7 +11,7 @@
   let categoryPeople = $derived(people.filter(p => p.category_id === categoryId));
 </script>
 
-<aside class="w-48 bg-white/40 dark:bg-black/20 backdrop-blur-sm border-r border-gray-200/50 dark:border-white/10 flex flex-col shrink-0 transition-colors duration-300">
+<aside class="w-48 bg-white/40 dark:bg-black/20 backdrop-blur-sm border-l border-gray-200/50 dark:border-white/10 flex flex-col shrink-0 transition-colors duration-300">
   <div class="h-11 px-4 border-b border-gray-200/50 dark:border-white/10 flex flex-col justify-center shrink-0">
     <span class="text-[10px] font-bold tracking-widest uppercase text-gray-500 dark:text-gray-400">People</span>
   </div>

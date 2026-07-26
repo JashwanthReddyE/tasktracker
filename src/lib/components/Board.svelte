@@ -44,7 +44,7 @@
 
 <main class="flex-1 overflow-x-auto flex gap-6 p-6 scrollbar-hide">
   {#each columns as col}
-    <div class="flex-1 min-w-[280px] max-w-sm flex flex-col gap-4">
+    <div class="flex-1 min-w-[280px] flex flex-col gap-4">
       <!-- Column Header -->
       <div class="flex items-center justify-between sticky top-0 z-10 px-1">
         <div class="flex items-center gap-2">

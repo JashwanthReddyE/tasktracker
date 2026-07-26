@@ -91,8 +91,8 @@
   <Topbar bind:activeCategoryId {categories} onAddCategory={() => isCategoryModalOpen = true} />
   
   <div class="flex flex-1 overflow-hidden">
-    <Sidebar bind:activePersonFilter {people} categoryId={activeCategoryId} onAddPerson={() => isPersonModalOpen = true} />
     <Board {filteredTasks} onMove={handleTaskMove} onAddTask={openTaskModal} />
+    <Sidebar bind:activePersonFilter {people} categoryId={activeCategoryId} onAddPerson={() => isPersonModalOpen = true} />
   </div>
 </div>
 
