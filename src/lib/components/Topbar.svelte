@@ -12,7 +12,7 @@
   }
 </script>
 
-<header class="h-14 bg-white/60 dark:bg-black/40 backdrop-blur-md border-b border-gray-200/50 dark:border-white/10 flex items-center px-6 gap-4 z-10 sticky top-0 shadow-sm">
+<header class="h-14 bg-white dark:bg-[#0f0f13] border-b border-gray-200 dark:border-white/10 flex items-center px-6 gap-4 z-10 sticky top-0 shadow-sm">
   <div class="flex items-baseline shrink-0">
     <h1 class="text-sm font-black tracking-widest uppercase text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-purple-600">Tasks</h1>
     <span class="ml-2 text-xs font-medium text-gray-500 dark:text-gray-400">Tracker</span>
