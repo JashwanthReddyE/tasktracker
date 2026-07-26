@@ -2,9 +2,10 @@
   import type { Task } from '$lib/types';
   import Card from './Card.svelte';
 
-  let { filteredTasks, onMove } = $props<{
+  let { filteredTasks, onMove, onAddTask } = $props<{
     filteredTasks: Task[];
     onMove: (taskId: string, newStatus: string) => void;
+    onAddTask: (status: string) => void;
   }>();
 
   const columns = [
@@ -53,7 +54,10 @@
             {filteredTasks.filter(t => t.status === col.id).length}
           </span>
         </div>
-        <button class="w-6 h-6 rounded-md flex items-center justify-center text-gray-400 hover:bg-white hover:shadow-sm dark:hover:bg-white/10 hover:text-gray-700 dark:hover:text-gray-200 transition-all">
+        <button 
+          class="w-6 h-6 rounded-md flex items-center justify-center text-gray-400 hover:bg-white hover:shadow-sm dark:hover:bg-white/10 hover:text-gray-700 dark:hover:text-gray-200 transition-all"
+          onclick={() => onAddTask(col.id)}
+        >
           +
         </button>
       </div>

@@ -1,9 +1,10 @@
 <script lang="ts">
   import type { Category } from '$lib/types';
   
-  let { categories, activeCategoryId = $bindable() } = $props<{
+  let { categories, activeCategoryId = $bindable(), onAddCategory } = $props<{
     categories: Category[];
     activeCategoryId: string;
+    onAddCategory: () => void;
   }>();
 
   function toggleTheme() {
@@ -28,7 +29,11 @@
         {cat.label}
       </button>
     {/each}
-    <button class="w-7 h-7 rounded-lg border border-dashed border-gray-300 dark:border-gray-600 text-gray-400 flex items-center justify-center hover:border-gray-500 hover:text-gray-600 dark:hover:border-gray-400 dark:hover:text-gray-300 transition-colors" aria-label="Add Category">
+    <button 
+      class="w-7 h-7 rounded-lg border border-dashed border-gray-300 dark:border-gray-600 text-gray-400 flex items-center justify-center hover:border-gray-500 hover:text-gray-600 dark:hover:border-gray-400 dark:hover:text-gray-300 transition-colors" 
+      aria-label="Add Category"
+      onclick={onAddCategory}
+    >
       +
     </button>
   </div>

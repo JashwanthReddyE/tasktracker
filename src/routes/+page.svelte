@@ -6,6 +6,9 @@
   import Board from '$lib/components/Board.svelte';
   import Topbar from '$lib/components/Topbar.svelte';
   import Sidebar from '$lib/components/Sidebar.svelte';
+  import TaskModal from '$lib/components/TaskModal.svelte';
+  import CategoryModal from '$lib/components/CategoryModal.svelte';
+  import PersonModal from '$lib/components/PersonModal.svelte';
 
   let { data } = $props<{ data: PageData }>();
 
@@ -18,6 +21,17 @@
   
   let activeCategoryId = $state(categories.length > 0 ? categories[0].id : '');
   let activePersonFilter = $state('');
+
+  // Modal states
+  let isTaskModalOpen = $state(false);
+  let newTaskStatus = $state('todo');
+  let isCategoryModalOpen = $state(false);
+  let isPersonModalOpen = $state(false);
+
+  function openTaskModal(status: string) {
+    newTaskStatus = status;
+    isTaskModalOpen = true;
+  }
 
   // Derived state for filtering
   let filteredTasks = $derived(
@@ -74,10 +88,14 @@
 </script>
 
 <div class="flex flex-col h-screen overflow-hidden bg-gradient-to-br from-gray-50 to-gray-200 dark:from-[#0a0a0f] dark:to-[#13131a] text-gray-900 dark:text-gray-100 transition-colors duration-300">
-  <Topbar bind:activeCategoryId {categories} />
+  <Topbar bind:activeCategoryId {categories} onAddCategory={() => isCategoryModalOpen = true} />
   
   <div class="flex flex-1 overflow-hidden">
-    <Sidebar bind:activePersonFilter {people} categoryId={activeCategoryId} />
-    <Board {filteredTasks} onMove={handleTaskMove} />
+    <Sidebar bind:activePersonFilter {people} categoryId={activeCategoryId} onAddPerson={() => isPersonModalOpen = true} />
+    <Board {filteredTasks} onMove={handleTaskMove} onAddTask={openTaskModal} />
   </div>
 </div>
+
+<TaskModal bind:isOpen={isTaskModalOpen} status={newTaskStatus} categoryId={activeCategoryId} {categories} {people} />
+<CategoryModal bind:isOpen={isCategoryModalOpen} {categories} />
+<PersonModal bind:isOpen={isPersonModalOpen} {categories} {people} activeCategoryId={activeCategoryId} />

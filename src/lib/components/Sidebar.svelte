@@ -1,10 +1,11 @@
 <script lang="ts">
   import type { Person } from '$lib/types';
   
-  let { people, activePersonFilter = $bindable(), categoryId } = $props<{
+  let { people, activePersonFilter = $bindable(), categoryId, onAddPerson } = $props<{
     people: Person[];
     activePersonFilter: string;
     categoryId: string;
+    onAddPerson: () => void;
   }>();
 
   let categoryPeople = $derived(people.filter(p => p.category_id === categoryId));
@@ -37,7 +38,10 @@
   </div>
 
   <div class="p-2 border-t border-gray-200/50 dark:border-white/10 shrink-0">
-    <button class="w-full py-1.5 rounded-lg border border-dashed border-gray-300 dark:border-gray-600 text-gray-400 text-[11px] font-medium hover:border-gray-500 hover:text-gray-600 dark:hover:border-gray-400 dark:hover:text-gray-300 transition-colors">
+    <button 
+      class="w-full py-1.5 rounded-lg border border-dashed border-gray-300 dark:border-gray-600 text-gray-400 text-[11px] font-medium hover:border-gray-500 hover:text-gray-600 dark:hover:border-gray-400 dark:hover:text-gray-300 transition-colors"
+      onclick={onAddPerson}
+    >
       + Add Person
     </button>
   </div>
