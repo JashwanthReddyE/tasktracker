@@ -43,9 +43,9 @@
   }
 </script>
 
-<main class="flex-1 overflow-x-auto flex gap-6 p-6 scrollbar-hide">
+<main class="flex-1 overflow-x-auto flex gap-4 md:gap-6 p-4 md:p-6 scrollbar-hide snap-x snap-mandatory md:snap-none">
   {#each columns as col, i}
-    <div class="flex-1 min-w-[280px] flex flex-col gap-4 relative">
+    <div class="flex-1 min-w-[85vw] max-w-[85vw] md:min-w-[280px] md:max-w-none snap-center md:snap-align-none flex flex-col gap-4 relative">
       <!-- Column Header -->
       <div class="flex items-center justify-between sticky top-0 z-10 px-1">
         <div class="flex items-center gap-2">

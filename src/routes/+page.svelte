@@ -88,8 +88,8 @@
 <div class="flex flex-col h-screen overflow-hidden bg-gradient-to-br from-gray-50 to-gray-200 dark:from-[#0a0a0f] dark:to-[#13131a] text-gray-900 dark:text-gray-100 transition-colors duration-300">
   <Topbar bind:activeCategoryId {categories} onAddCategory={() => isCategoryModalOpen = true} />
   
-  <div class="flex flex-1 overflow-hidden">
-    <Board {filteredTasks} onMove={handleTaskMove} onAddTask={openTaskModal} />
+  <div class="flex flex-col md:flex-row flex-1 overflow-hidden">
+    <Board {filteredTasks} {people} onMove={handleTaskMove} onAddTask={openTaskModal} />
     <Sidebar bind:activePersonFilter {people} />
   </div>
 </div>

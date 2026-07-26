@@ -12,13 +12,13 @@
   }
 </script>
 
-<header class="h-14 bg-white dark:bg-[#0f0f13] border-b border-gray-200 dark:border-white/10 flex items-center px-6 gap-4 z-10 sticky top-0 shadow-sm">
+<header class="h-14 bg-white dark:bg-[#0f0f13] border-b border-gray-200 dark:border-white/10 flex items-center px-4 md:px-6 gap-3 md:gap-4 z-10 sticky top-0 shadow-sm">
   <div class="flex items-baseline shrink-0">
-    <h1 class="text-sm font-black tracking-widest uppercase text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-purple-600">Tasks</h1>
-    <span class="ml-2 text-xs font-medium text-gray-500 dark:text-gray-400">Tracker</span>
+    <h1 class="text-sm md:text-base font-black tracking-widest uppercase text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-purple-600">Tasks</h1>
+    <span class="hidden sm:inline ml-2 text-xs font-medium text-gray-500 dark:text-gray-400">Tracker</span>
   </div>
 
-  <div class="w-px h-5 bg-gray-300 dark:bg-gray-700 mx-2"></div>
+  <div class="w-px h-5 bg-gray-300 dark:bg-gray-700 mx-1 md:mx-2 shrink-0"></div>
 
   <div class="flex items-center gap-2 overflow-x-auto flex-1 scrollbar-hide">
     {#each categories as cat}
