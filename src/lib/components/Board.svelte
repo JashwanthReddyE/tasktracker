@@ -1,3 +1,4 @@
+<script lang="ts">
   import type { Task, Profile } from '$lib/types';
   import Card from './Card.svelte';
 
