@@ -1,15 +1,23 @@
-# Local task data. The database now lives in the OS app-data directory by
-# default, so these are backstops in case someone points TASKTRACKER_DB here.
-tasks.json
-*.db
-*.db-wal
-*.db-shm
+node_modules
 
-# Build artifacts
-tasktracker
-tasktracker.exe
-*.exe
+# Output
+.output
+.vercel
+.netlify
+.wrangler
+/.svelte-kit
+/build
 
-# OS junk
-Thumbs.db
+# OS
 .DS_Store
+Thumbs.db
+
+# Env
+.env
+.env.*
+!.env.example
+!.env.test
+
+# Vite
+vite.config.js.timestamp-*
+vite.config.ts.timestamp-*
