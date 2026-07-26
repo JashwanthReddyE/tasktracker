@@ -1,10 +1,11 @@
 <script lang="ts">
   import type { Category } from '$lib/types';
   
-  let { categories, activeCategoryId = $bindable(), onAddCategory } = $props<{
+  let { categories, activeCategoryId = $bindable(), onAddCategory, onToggleTeam } = $props<{
     categories: Category[];
     activeCategoryId: string;
     onAddCategory: () => void;
+    onToggleTeam: () => void;
   }>();
 
   function toggleTheme() {
@@ -38,7 +39,12 @@
     </button>
   </div>
 
-  <div class="flex items-center gap-3 shrink-0 ml-auto">
+  <div class="flex items-center gap-2 md:gap-3 shrink-0 ml-auto">
+    <button onclick={onToggleTeam} class="md:hidden p-2 rounded-lg bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/40 transition-colors" title="Team Directory">
+      <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+      </svg>
+    </button>
     <button onclick={toggleTheme} class="p-2 rounded-lg bg-gray-100 dark:bg-white/5 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-white/10 transition-colors" title="Toggle Theme">
       <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
