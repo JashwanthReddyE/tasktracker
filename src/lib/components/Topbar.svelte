@@ -51,7 +51,7 @@
       <form method="POST" action="?/switchTeam" class="mr-2">
         <select 
           name="team_id" 
-          onchange="this.form.submit()" 
+          onchange={(e) => e.currentTarget.form?.submit()} 
           class="text-xs font-semibold rounded-lg border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 px-2 py-1.5 outline-none text-gray-700 dark:text-gray-300 focus:ring-2 focus:ring-purple-500"
         >
           {#each my_teams as team}
