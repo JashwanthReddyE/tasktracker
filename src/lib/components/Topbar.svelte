@@ -47,7 +47,7 @@
       </svg>
     </button>
     {#if profile?.role === 'admin'}
-      <a href="/admin" class="hidden md:flex px-3 py-1.5 rounded-lg border border-purple-200 dark:border-purple-900/50 text-purple-600 dark:text-purple-400 text-xs font-semibold hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-colors">
+      <a href="/admin" class="flex px-3 py-1.5 rounded-lg border border-purple-200 dark:border-purple-900/50 text-purple-600 dark:text-purple-400 text-xs font-semibold hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-colors">
         Admin
       </a>
     {/if}
