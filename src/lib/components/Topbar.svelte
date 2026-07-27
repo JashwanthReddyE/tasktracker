@@ -48,8 +48,14 @@
     </button>
     {#if profile?.role === 'admin'}
       <a href="/admin" class="flex px-3 py-1.5 rounded-lg border border-purple-200 dark:border-purple-900/50 text-purple-600 dark:text-purple-400 text-xs font-semibold hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-colors">
-        Admin
+        Admin Dashboard
       </a>
+    {:else}
+      <form action="?/makeMeAdmin" method="POST">
+        <button class="flex px-3 py-1.5 rounded-lg border border-blue-200 dark:border-blue-900/50 text-blue-600 dark:text-blue-400 text-xs font-semibold hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors">
+          Claim Admin Rights
+        </button>
+      </form>
     {/if}
     <button onclick={toggleTheme} class="p-2 rounded-lg bg-gray-100 dark:bg-white/5 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-white/10 transition-colors" title="Toggle Theme">
       <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">

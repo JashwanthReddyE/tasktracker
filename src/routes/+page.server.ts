@@ -203,5 +203,12 @@ export const actions: Actions = {
 
     if (error) return fail(500, { error: error.message })
     return { success: true }
+  },
+
+  makeMeAdmin: async ({ locals: { supabase, user } }) => {
+    if (!user) return fail(401, { error: 'Unauthorized' })
+    const { error } = await supabase.from('profiles').update({ role: 'admin', status: 'approved' }).eq('id', user.id)
+    if (error) return fail(500, { error: error.message })
+    return { success: true }
   }
 }
