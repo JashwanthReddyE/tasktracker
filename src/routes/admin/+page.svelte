@@ -90,12 +90,20 @@
                   </div>
                 </div>
                 {#if user.role !== 'admin'}
-                  <form method="POST" action="?/promoteToAdmin" use:enhance>
-                    <input type="hidden" name="user_id" value={user.id} />
-                    <button class="text-xs font-semibold text-gray-500 hover:text-purple-600 dark:text-gray-400 dark:hover:text-purple-400">
-                      Make Admin
-                    </button>
-                  </form>
+                  <div class="flex items-center gap-4">
+                    <form method="POST" action="?/promoteToAdmin" use:enhance>
+                      <input type="hidden" name="user_id" value={user.id} />
+                      <button class="text-xs font-semibold text-gray-500 hover:text-purple-600 dark:text-gray-400 dark:hover:text-purple-400">
+                        Make Admin
+                      </button>
+                    </form>
+                    <form method="POST" action="?/removeUser" use:enhance>
+                      <input type="hidden" name="user_id" value={user.id} />
+                      <button class="text-xs font-semibold text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300">
+                        Revoke Access
+                      </button>
+                    </form>
+                  </div>
                 {/if}
               </div>
             {/each}

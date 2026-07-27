@@ -58,6 +58,24 @@ export const actions: Actions = {
     return { success: true };
   },
 
+  removeUser: async ({ request, locals: { supabase, user } }) => {
+    if (!user) return fail(401, { error: 'Unauthorized' });
+    
+    const formData = await request.formData();
+    const targetUserId = formData.get('user_id') as string;
+    
+    if (!targetUserId) return fail(400, { error: 'Missing user ID' });
+
+    // We 'remove' them by revoking their approval and team, locking them out
+    const { error } = await supabase
+      .from('profiles')
+      .update({ status: 'pending', role: 'user', team_id: null })
+      .eq('id', targetUserId);
+      
+    if (error) return fail(500, { error: error.message });
+    return { success: true };
+  },
+
   createTeam: async ({ request, locals: { supabase, user } }) => {
     if (!user) return fail(401, { error: 'Unauthorized' });
     
