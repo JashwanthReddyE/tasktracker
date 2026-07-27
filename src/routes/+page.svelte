@@ -12,6 +12,7 @@
   let { data } = $props<{ data: PageData }>();
 
   let supabase = $derived(data.supabase);
+  let profile = $derived(data.profile as Profile);
 
   // Use Svelte 5 state
   let tasks = $state(data.tasks as Task[]);
@@ -95,7 +96,7 @@
 </svelte:head>
 
 <div class="flex flex-col h-screen overflow-hidden bg-gradient-to-br from-gray-50 to-gray-200 dark:from-[#0a0a0f] dark:to-[#13131a] text-gray-900 dark:text-gray-100 transition-colors duration-300">
-  <Topbar bind:activeCategoryId {categories} onAddCategory={() => isCategoryModalOpen = true} onToggleTeam={() => isMobileSidebarOpen = true} />
+  <Topbar bind:activeCategoryId {categories} {profile} onAddCategory={() => isCategoryModalOpen = true} onToggleTeam={() => isMobileSidebarOpen = true} />
   
   <div class="flex flex-col md:flex-row flex-1 overflow-hidden relative">
     <Board {filteredTasks} {people} onMove={handleTaskMove} onAddTask={openTaskModal} />

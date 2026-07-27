@@ -54,10 +54,13 @@ export const actions: Actions = {
     const peopleIdsJson = formData.get('people_ids') as string
     const peopleIds = peopleIdsJson ? JSON.parse(peopleIdsJson) : []
 
+    const { data: profile } = await supabase.from('profiles').select('team_id').eq('id', user.id).single()
+
     const { data: task, error } = await supabase
       .from('tasks')
       .insert({
         user_id: user.id,
+        team_id: profile?.team_id,
         title,
         notes,
         priority,
@@ -164,8 +167,10 @@ export const actions: Actions = {
     
     // Insert new
     if (categories.length > 0) {
+      const { data: profile } = await supabase.from('profiles').select('team_id').eq('id', user.id).single()
       const inserts = categories.map((c: any, i: number) => ({
         user_id: user.id,
+        team_id: profile?.team_id,
         id: c.id,
         label: c.label,
         position: i

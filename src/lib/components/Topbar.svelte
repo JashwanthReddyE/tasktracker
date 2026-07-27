@@ -1,9 +1,10 @@
 <script lang="ts">
-  import type { Category } from '$lib/types';
+  import type { Category, Profile } from '$lib/types';
   
-  let { categories, activeCategoryId = $bindable(), onAddCategory, onToggleTeam } = $props<{
+  let { categories, activeCategoryId = $bindable(), profile, onAddCategory, onToggleTeam } = $props<{
     categories: Category[];
     activeCategoryId: string;
+    profile: Profile;
     onAddCategory: () => void;
     onToggleTeam: () => void;
   }>();
@@ -45,6 +46,11 @@
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
       </svg>
     </button>
+    {#if profile?.role === 'admin'}
+      <a href="/admin" class="hidden md:flex px-3 py-1.5 rounded-lg border border-purple-200 dark:border-purple-900/50 text-purple-600 dark:text-purple-400 text-xs font-semibold hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-colors">
+        Admin
+      </a>
+    {/if}
     <button onclick={toggleTheme} class="p-2 rounded-lg bg-gray-100 dark:bg-white/5 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-white/10 transition-colors" title="Toggle Theme">
       <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
