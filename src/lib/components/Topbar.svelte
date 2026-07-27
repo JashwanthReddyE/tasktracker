@@ -1,10 +1,11 @@
 <script lang="ts">
-  import type { Category, Profile } from '$lib/types';
+  import type { Category, Profile, Team } from '$lib/types';
   
-  let { categories, activeCategoryId = $bindable(), profile, onAddCategory, onToggleTeam } = $props<{
+  let { categories, activeCategoryId = $bindable(), profile, my_teams, onAddCategory, onToggleTeam } = $props<{
     categories: Category[];
     activeCategoryId: string;
     profile: Profile;
+    my_teams: Team[];
     onAddCategory: () => void;
     onToggleTeam: () => void;
   }>();
@@ -46,6 +47,19 @@
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
       </svg>
     </button>
+    {#if my_teams && my_teams.length > 1}
+      <form method="POST" action="?/switchTeam" class="mr-2">
+        <select 
+          name="team_id" 
+          onchange="this.form.submit()" 
+          class="text-xs font-semibold rounded-lg border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 px-2 py-1.5 outline-none text-gray-700 dark:text-gray-300 focus:ring-2 focus:ring-purple-500"
+        >
+          {#each my_teams as team}
+            <option value={team.id} selected={team.id === profile?.team_id}>{team.name}</option>
+          {/each}
+        </select>
+      </form>
+    {/if}
     {#if profile?.role === 'admin'}
       <a href="/admin" class="flex px-3 py-1.5 rounded-lg border border-purple-200 dark:border-purple-900/50 text-purple-600 dark:text-purple-400 text-xs font-semibold hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-colors">
         Manage Users

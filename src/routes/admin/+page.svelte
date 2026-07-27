@@ -40,29 +40,34 @@
           {:else}
             <div class="space-y-4">
               {#each pendingUsers as user}
-                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-xl border border-gray-100 dark:border-white/5 bg-gray-50/50 dark:bg-black/20">
-                  <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-full flex items-center justify-center text-sm text-white font-bold shrink-0" style="background-color: hsl({user.hue}, 65%, 55%)">
-                      {user.name.charAt(0).toUpperCase()}
-                    </div>
-                    <div>
-                      <p class="font-semibold text-gray-900 dark:text-white">{user.name}</p>
-                      <p class="text-sm text-gray-500 dark:text-gray-400">{user.email}</p>
-                    </div>
+                <div class="p-4 bg-white dark:bg-[#13131a] rounded-xl border border-gray-100 dark:border-white/5 flex items-center justify-between shadow-sm">
+                  <div>
+                    <div class="font-medium text-gray-900 dark:text-gray-100">{user.name}</div>
+                    <div class="text-sm text-gray-500 dark:text-gray-400">{user.email}</div>
+                    {#if user.requested_team_id}
+                      {@const team = data.teams.find(t => t.id === user.requested_team_id)}
+                      <div class="text-xs text-blue-500 dark:text-blue-400 mt-1">Requested to join: {team?.name || 'Unknown Team'}</div>
+                    {/if}
                   </div>
-                  
-                  <form method="POST" action="?/approveUser" use:enhance class="flex items-center gap-2">
-                    <input type="hidden" name="user_id" value={user.id} />
-                    <select name="team_id" required class="text-sm rounded-lg border-gray-300 dark:border-white/10 bg-white dark:bg-black/40 text-gray-900 dark:text-white py-2 pl-3 pr-8 focus:ring-blue-500 focus:border-blue-500 outline-none">
-                      <option value="" disabled selected>Select Team...</option>
-                      {#each data.teams as team}
-                        <option value={team.id}>{team.name}</option>
-                      {/each}
-                    </select>
-                    <button class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-semibold transition-colors">
-                      Approve
-                    </button>
-                  </form>
+                  <div class="flex items-center gap-3">
+                    <form method="POST" action="?/approveUser" use:enhance class="flex items-center gap-2">
+                      <input type="hidden" name="user_id" value={user.id} />
+                      <select name="team_id" class="text-sm rounded-lg border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 px-2 py-1 outline-none text-gray-700 dark:text-gray-300">
+                        {#each data.teams as team}
+                          <option value={team.id} selected={team.id === user.requested_team_id}>{team.name}</option>
+                        {/each}
+                      </select>
+                      <button class="px-4 py-2 rounded-lg bg-green-500 hover:bg-green-600 text-white text-sm font-semibold transition-colors shadow-lg shadow-green-500/20">
+                        Approve
+                      </button>
+                    </form>
+                    <form method="POST" action="?/denyUser" use:enhance>
+                      <input type="hidden" name="user_id" value={user.id} />
+                      <button class="px-4 py-2 rounded-lg bg-red-500 hover:bg-red-600 text-white text-sm font-semibold transition-colors shadow-lg shadow-red-500/20">
+                        Deny
+                      </button>
+                    </form>
+                  </div>
                 </div>
               {/each}
             </div>

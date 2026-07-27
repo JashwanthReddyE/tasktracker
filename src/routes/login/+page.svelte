@@ -1,6 +1,9 @@
 <script lang="ts">
   import { enhance } from '$app/forms';
-  let { form } = $props();
+  import type { ActionData, PageData } from './$types';
+  import type { Team } from '$lib/types';
+
+  let { form, data } = $props<{ form: ActionData, data: PageData }>();
   
   let mode = $state<'login' | 'signup' | 'forgot'>('login');
   let isLoading = $state(false);
@@ -46,6 +49,15 @@
           <div>
             <label for="name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Full Name</label>
             <input type="text" id="name" name="name" value={form?.name ?? ''} required class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white/50 dark:bg-black/20 px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all dark:text-white" placeholder="John Doe" />
+          </div>
+          <div>
+            <label for="requested_team_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Request to Join a Team (Optional)</label>
+            <select id="requested_team_id" name="requested_team_id" class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white/50 dark:bg-black/20 px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all dark:text-white">
+              <option value="">-- No Team (General) --</option>
+              {#each data.teams as team}
+                <option value={team.id}>{team.name}</option>
+              {/each}
+            </select>
           </div>
         {/if}
 

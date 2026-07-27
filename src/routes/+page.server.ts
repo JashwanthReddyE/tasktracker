@@ -210,5 +210,17 @@ export const actions: Actions = {
     const { error } = await supabase.from('profiles').update({ role: 'admin', status: 'approved' }).eq('id', user.id)
     if (error) return fail(500, { error: error.message })
     return { success: true }
+  },
+
+  switchTeam: async ({ request, locals: { supabase, user } }) => {
+    if (!user) return fail(401, { error: 'Unauthorized' })
+    const formData = await request.formData()
+    const team_id = formData.get('team_id') as string
+
+    if (!team_id) return fail(400, { error: 'Missing team_id' })
+
+    const { error } = await supabase.from('profiles').update({ team_id }).eq('id', user.id)
+    if (error) return fail(500, { error: error.message })
+    return { success: true }
   }
 }

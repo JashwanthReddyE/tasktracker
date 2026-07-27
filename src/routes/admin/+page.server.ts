@@ -32,9 +32,51 @@ export const actions: Actions = {
     
     if (!targetUserId || !teamId) return fail(400, { error: 'Missing fields' });
 
+
+    // Admin can override the team during approval
+    const teamIdOverride = formData.get('team_id') as string;
+    
+    if (!targetUserId) return fail(400, { error: 'Missing user ID' });
+
+    // First fetch the profile to get their requested team if no override
+    const { data: profile } = await supabase.from('profiles').select('requested_team_id').eq('id', targetUserId).single();
+    
+    const finalTeamId = teamIdOverride || profile?.requested_team_id || '00000000-0000-0000-0000-000000000000';
+
+    // 1. Approve them and set active team
+    const { error: profileError } = await supabase
+      .from('profiles')
+      .update({ status: 'approved', team_id: finalTeamId })
+      .eq('id', targetUserId);
+      
+    if (profileError) return fail(500, { error: profileError.message });
+
+    // 2. Add them to team_members
+    const { error: teamError } = await supabase
+      .from('team_members')
+      .insert({ team_id: finalTeamId, user_id: targetUserId })
+      .select()
+      .single();
+
+    // Ignore conflict error if they are already in the team
+    if (teamError && teamError.code !== '23505') {
+       return fail(500, { error: teamError.message });
+    }
+
+    return { success: true };
+  },
+
+  denyUser: async ({ request, locals: { supabase, user } }) => {
+    if (!user) return fail(401, { error: 'Unauthorized' });
+    
+    const formData = await request.formData();
+    const targetUserId = formData.get('user_id') as string;
+    
+    if (!targetUserId) return fail(400, { error: 'Missing user ID' });
+
     const { error } = await supabase
       .from('profiles')
-      .update({ status: 'approved', team_id: teamId })
+      .update({ status: 'rejected' })
       .eq('id', targetUserId);
       
     if (error) return fail(500, { error: error.message });
