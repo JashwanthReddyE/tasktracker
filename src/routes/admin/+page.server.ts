@@ -144,6 +144,11 @@ export const actions: Actions = {
     
     if (!name) return fail(400, { error: 'Missing team name' });
 
+    const { data: existingTeam } = await supabase.from('teams').select('id').ilike('name', name).single();
+    if (existingTeam) {
+      return fail(400, { error: `A team with the name "${name}" already exists.` });
+    }
+
     const { error } = await supabase
       .from('teams')
       .insert({ name, created_by: user.id });

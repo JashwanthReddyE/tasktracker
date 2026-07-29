@@ -69,6 +69,18 @@ export const actions: Actions = {
     const peopleIds = peopleIdsJson ? JSON.parse(peopleIdsJson) : []
 
     const { data: profile } = await supabase.from('profiles').select('team_id').eq('id', user.id).single()
+    
+    // Check for duplicate task title in the same team
+    const { data: existingTask } = await supabase
+      .from('tasks')
+      .select('id')
+      .eq('team_id', profile?.team_id)
+      .ilike('title', title)
+      .single()
+      
+    if (existingTask) {
+      return fail(400, { error: `A task with the title "${title}" already exists in your team.` })
+    }
 
     const { data: task, error } = await supabase
       .from('tasks')
@@ -115,6 +127,22 @@ export const actions: Actions = {
     const due_date = formData.get('due_date') as string
     const archived = formData.get('archived') === 'true'
     const position = parseInt(formData.get('position') as string, 10)
+
+    const { data: profile } = await supabase.from('profiles').select('team_id').eq('id', user.id).single()
+
+    if (title) {
+      const { data: existingTask } = await supabase
+        .from('tasks')
+        .select('id')
+        .eq('team_id', profile?.team_id)
+        .ilike('title', title)
+        .neq('id', id)
+        .single()
+        
+      if (existingTask) {
+        return fail(400, { error: `A task with the title "${title}" already exists in your team.` })
+      }
+    }
 
     const updates: any = {}
     if (title !== null) updates.title = title
@@ -175,6 +203,13 @@ export const actions: Actions = {
     const formData = await request.formData()
     const categoriesJson = formData.get('categories') as string
     const categories = JSON.parse(categoriesJson || '[]')
+
+    // Check for duplicates
+    const labels = categories.map((c: any) => c.label.toLowerCase().trim())
+    const uniqueLabels = new Set(labels)
+    if (labels.length !== uniqueLabels.size) {
+      return fail(400, { error: 'Category names must be unique within your team.' })
+    }
 
     // Delete existing
     await supabase.from('categories').delete().eq('user_id', user.id)

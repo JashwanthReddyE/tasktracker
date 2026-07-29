@@ -36,7 +36,15 @@
         <button class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors" onclick={close}>✕</button>
       </div>
       
-      <form method="POST" action="?/replaceCategories" use:enhance={({ formData }) => {
+      <form method="POST" action="?/replaceCategories" use:enhance={({ formData, cancel }) => {
+        const labels = tempCategories.map((c: any) => c.label.toLowerCase().trim());
+        const uniqueLabels = new Set(labels);
+        if (labels.length !== uniqueLabels.size) {
+          alert('Category names must be unique.');
+          cancel();
+          return;
+        }
+        
         formData.set('categories', JSON.stringify(tempCategories));
         return async ({ result, update }) => {
           if (result.type === 'success') {
