@@ -20,6 +20,12 @@
   let tasks = $state(data.tasks as Task[]);
   let categories = $state(data.categories as Category[]);
   let people = $state(data.people as Profile[]);
+
+  $effect(() => {
+    tasks = data.tasks as Task[];
+    categories = data.categories as Category[];
+    people = data.people as Profile[];
+  });
   
   let activeCategoryId = $state(categories.length > 0 ? categories[0].id : '');
   let activePersonFilter = $state('');

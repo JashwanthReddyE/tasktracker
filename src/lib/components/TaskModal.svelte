@@ -44,6 +44,9 @@
         return async ({ result, update }) => {
           if (result.type === 'success') {
             close();
+          } else if (result.type === 'failure') {
+            console.error('Failed to create task:', result.data);
+            alert('Failed to create task: ' + (result.data?.error || 'Unknown error'));
           }
           await update();
         };
