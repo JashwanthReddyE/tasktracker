@@ -17,9 +17,9 @@
   let my_teams = $derived(data.my_teams || []);
   
   // Use Svelte 5 state
-  let tasks = $state(data.tasks as Task[]);
-  let categories = $state(data.categories as Category[]);
-  let people = $state(data.people as Profile[]);
+  let tasks = $state<Task[]>([]);
+  let categories = $state<Category[]>([]);
+  let people = $state<Profile[]>([]);
 
   $effect(() => {
     tasks = data.tasks as Task[];

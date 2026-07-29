@@ -147,8 +147,8 @@
           
           <form method="POST" action="?/createTeam" use:enhance class="space-y-3">
             <div>
-              <label class="block text-xs font-medium text-gray-700 dark:text-gray-400 mb-1">Create New Team</label>
-              <input type="text" name="name" required placeholder="e.g. Marketing" class="w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-black/40 px-3 py-2 text-sm focus:ring-blue-500 focus:border-blue-500 dark:text-white outline-none">
+              <label for="team_name" class="block text-xs font-medium text-gray-700 dark:text-gray-400 mb-1">Create New Team</label>
+              <input type="text" id="team_name" name="name" required placeholder="e.g. Marketing" class="w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-black/40 px-3 py-2 text-sm focus:ring-blue-500 focus:border-blue-500 dark:text-white outline-none">
             </div>
             <button class="w-full px-4 py-2 bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-lg text-sm font-semibold hover:bg-gray-800 dark:hover:bg-gray-100 transition-colors">
               Add Team

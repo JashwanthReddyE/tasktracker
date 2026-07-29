@@ -25,7 +25,7 @@
 ">
   <div class="h-14 md:h-11 px-4 border-b border-gray-200/50 dark:border-white/10 flex items-center justify-between shrink-0">
     <span class="text-[10px] md:text-[10px] font-bold tracking-widest uppercase text-gray-500 dark:text-gray-400">Team Directory</span>
-    <button class="md:hidden p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200" onclick={() => isOpen = false}>
+    <button class="md:hidden p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200" aria-label="Close Sidebar" onclick={() => isOpen = false}>
       <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
     </button>
   </div>

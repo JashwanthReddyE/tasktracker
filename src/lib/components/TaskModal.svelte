@@ -152,7 +152,7 @@
                   form.submit();
                 }}>Confirm Delete</button>
                 <button type="button" class="px-3 py-1.5 text-xs font-medium text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition-colors animate-in fade-in" onclick={() => isConfirmingDelete = false}>Cancel</button>
-              {#else}
+              {:else}
                 <button type="button" class="px-4 py-2 text-sm font-bold text-red-500 hover:text-white hover:bg-red-500 rounded-lg transition-all border border-red-500 hover:border-transparent shadow-sm" onclick={() => isConfirmingDelete = true}>Delete</button>
               {/if}
             </div>
