@@ -26,6 +26,20 @@ export const load: PageServerLoad = async ({ locals: { supabase, safeGetSession 
     .select('*')
     .order('name', { ascending: true })
 
+  // --- DEBUG CODE ---
+  try {
+    const fs = await import('fs');
+    const { data: myProfile } = await supabase.from('profiles').select('*').eq('id', user.id).single();
+    // Get foreign keys for tasks table
+    const { data: fks } = await supabase.rpc('get_foreign_keys'); // if this exists, else raw query
+    // Actually we can't easily query information_schema from supabase-js. 
+    // Let's just dump the user and profile.
+    fs.writeFileSync('debug.json', JSON.stringify({ user, myProfile }, null, 2));
+  } catch (e) {
+    console.error('Debug write failed', e);
+  }
+  // --- END DEBUG CODE ---
+
   if (tasksError) console.error('Error loading tasks:', tasksError)
   if (catsError) console.error('Error loading cats:', catsError)
   if (profilesError) console.error('Error loading profiles:', profilesError)

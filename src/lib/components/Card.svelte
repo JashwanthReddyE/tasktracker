@@ -29,18 +29,27 @@
   ondragend={handleDragEnd}
   class="group bg-white dark:bg-[#1c1c26] rounded-xl p-3.5 border border-gray-200/60 dark:border-white/5 shadow-sm hover:shadow-md hover:border-gray-300 dark:hover:border-white/10 transition-all duration-200 cursor-grab active:cursor-grabbing relative overflow-hidden flex flex-col gap-1.5"
 >
-  <!-- Priority Indicator -->
-  <div class="absolute top-0 left-0 w-1 h-full {task.priority === 'high' ? 'bg-red-500' : task.priority === 'low' ? 'bg-green-500' : 'bg-orange-400'}"></div>
+  <!-- Status Indicator (Ribbon) -->
+  <div class="absolute top-0 left-0 w-1 h-full {task.status === 'todo' ? 'bg-orange-400' : task.status === 'working' ? 'bg-blue-500' : 'bg-green-500'}"></div>
   
-  <h3 class="text-[13px] font-semibold text-gray-800 dark:text-gray-100 leading-snug pr-4">{task.title}</h3>
+  <div class="flex items-start justify-between gap-2">
+    <h3 class="text-[13px] font-semibold {task.status === 'done' ? 'text-gray-400 dark:text-gray-500 line-through' : 'text-gray-800 dark:text-gray-100'} leading-snug break-words flex-1">
+      {task.title}
+    </h3>
+    
+    <!-- Priority Badge -->
+    <span class="shrink-0 px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider {task.priority === 'high' ? 'bg-red-100 text-red-600 dark:bg-red-500/20 dark:text-red-400' : task.priority === 'low' ? 'bg-green-100 text-green-600 dark:bg-green-500/20 dark:text-green-400' : 'bg-yellow-100 text-yellow-600 dark:bg-yellow-500/20 dark:text-yellow-400'}">
+      {task.priority}
+    </span>
+  </div>
   
   {#if task.notes}
-    <p class="text-[11px] text-gray-500 dark:text-gray-400 line-clamp-2 leading-relaxed">{task.notes}</p>
+    <p class="text-[11px] {task.status === 'done' ? 'text-gray-400/70 dark:text-gray-500/70 line-through' : 'text-gray-500 dark:text-gray-400'} line-clamp-2 leading-relaxed">{task.notes}</p>
   {/if}
   
   <div class="flex items-center gap-2 mt-1.5 pt-2 border-t border-gray-100 dark:border-white/5">
     {#if task.due_date}
-      <span class="text-[9px] font-bold tracking-wide uppercase px-1.5 py-0.5 rounded bg-gray-100 dark:bg-white/5 text-gray-500 dark:text-gray-400">
+      <span class="text-[9px] font-bold tracking-wide uppercase px-1.5 py-0.5 rounded {task.status === 'done' ? 'bg-gray-50 dark:bg-white/5 text-gray-400 dark:text-gray-500' : 'bg-gray-100 dark:bg-white/10 text-gray-500 dark:text-gray-300'}">
         {task.due_date}
       </span>
     {/if}
