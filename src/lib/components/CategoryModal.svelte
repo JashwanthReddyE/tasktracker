@@ -36,10 +36,13 @@
         <button class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors" onclick={close}>✕</button>
       </div>
       
-      <form method="POST" action="?/replaceCategories" use:enhance={() => {
+      <form method="POST" action="?/replaceCategories" use:enhance={({ formData }) => {
+        formData.set('categories', JSON.stringify(tempCategories));
         return async ({ result, update }) => {
           if (result.type === 'success') {
             close();
+          } else if (result.type === 'failure') {
+            alert('Failed to save categories: ' + (result.data?.error || 'Unknown error'));
           }
           await update();
         };

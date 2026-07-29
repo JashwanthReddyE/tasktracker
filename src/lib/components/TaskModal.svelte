@@ -22,6 +22,7 @@
   let notes = $state('');
   let priority = $state('medium');
   let due_date = $state('');
+  let currentCategoryId = $state('');
   let selectedPeople = $state<string[]>([]);
   let isConfirmingDelete = $state(false);
   
@@ -31,6 +32,7 @@
       notes = task?.notes || '';
       priority = task?.priority || 'medium';
       due_date = task?.due_date || '';
+      currentCategoryId = task?.category_id || categoryId || '';
       selectedPeople = task?.task_assignments?.map(ta => ta.user_id) || [];
       isConfirmingDelete = false;
     }
@@ -75,7 +77,6 @@
           <input type="hidden" name="id" value={task.id} />
         {/if}
         <input type="hidden" name="status" value={status} />
-        <input type="hidden" name="category_id" value={categoryId} />
         <input type="hidden" name="people_ids" value={JSON.stringify(selectedPeople)} />
         
         <div>
@@ -83,6 +84,16 @@
           <input type="text" id="title" name="title" bind:value={title} required class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-transparent px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all dark:text-white" placeholder="What needs to be done?" />
         </div>
         
+        <div>
+          <label for="category_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Category</label>
+          <select id="category_id" name="category_id" bind:value={currentCategoryId} class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-transparent px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all dark:text-white">
+            <option value="" class="text-black">No Category</option>
+            {#each categories as cat}
+              <option value={cat.id} class="text-black">{cat.label}</option>
+            {/each}
+          </select>
+        </div>
+
         <div>
           <label for="notes" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Notes</label>
           <textarea id="notes" name="notes" bind:value={notes} rows="3" class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-transparent px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all dark:text-white" placeholder="Additional details..."></textarea>

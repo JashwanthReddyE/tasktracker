@@ -1,9 +1,9 @@
 <script lang="ts">
   import type { Category, Profile, Team } from '$lib/types';
   
-  let { categories, activeCategoryId = $bindable(), profile, my_teams, onAddCategory, onToggleTeam } = $props<{
+  let { categories, activeCategoryIds = $bindable(), profile, my_teams, onAddCategory, onToggleTeam } = $props<{
     categories: Category[];
-    activeCategoryId: string;
+    activeCategoryIds: string[];
     profile: Profile;
     my_teams: Team[];
     onAddCategory: () => void;
@@ -12,6 +12,14 @@
 
   function toggleTheme() {
     document.documentElement.classList.toggle('dark');
+  }
+
+  function toggleCategory(id: string) {
+    if (activeCategoryIds.includes(id)) {
+      activeCategoryIds = activeCategoryIds.filter(c => c !== id);
+    } else {
+      activeCategoryIds = [...activeCategoryIds, id];
+    }
   }
 </script>
 
@@ -24,10 +32,11 @@
   <div class="w-px h-5 bg-gray-300 dark:bg-gray-700 mx-1 md:mx-2 shrink-0"></div>
 
   <div class="flex items-center gap-2 overflow-x-auto flex-1 scrollbar-hide">
+    <span class="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mr-1">Categories:</span>
     {#each categories as cat}
       <button 
-        class="px-3 py-1.5 rounded-lg text-xs font-semibold tracking-wide transition-all duration-200 {activeCategoryId === cat.id ? 'bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-300 shadow-sm' : 'text-gray-500 hover:text-gray-900 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-gray-100 dark:hover:bg-white/5'}"
-        onclick={() => activeCategoryId = cat.id}
+        class="px-3 py-1.5 rounded-lg text-xs font-semibold tracking-wide transition-all duration-200 {activeCategoryIds.includes(cat.id) ? 'bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-300 shadow-sm' : 'text-gray-500 hover:text-gray-900 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-gray-100 dark:hover:bg-white/5'}"
+        onclick={() => toggleCategory(cat.id)}
       >
         {cat.label}
       </button>
@@ -35,6 +44,7 @@
     <button 
       class="w-7 h-7 rounded-lg border border-dashed border-gray-300 dark:border-gray-600 text-gray-400 flex items-center justify-center hover:border-gray-500 hover:text-gray-600 dark:hover:border-gray-400 dark:hover:text-gray-300 transition-colors" 
       aria-label="Add Category"
+      title="Manage Categories"
       onclick={onAddCategory}
     >
       +

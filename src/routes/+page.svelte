@@ -27,7 +27,7 @@
     people = data.people as Profile[];
   });
   
-  let activeCategoryId = $state(categories.length > 0 ? categories[0].id : '');
+  let activeCategoryIds = $state<string[]>([]);
   let activePersonFilter = $state('');
 
   // Modal states
@@ -52,7 +52,7 @@
   // Derived state for filtering
   let filteredTasks = $derived(
     tasks.filter(t => 
-      (activeCategoryId === '' || t.category_id === activeCategoryId) &&
+      (activeCategoryIds.length === 0 || activeCategoryIds.includes(t.category_id)) &&
       (activePersonFilter === '' || t.task_assignments?.some(a => a.user_id === activePersonFilter))
     )
   );
@@ -112,7 +112,7 @@
 </svelte:head>
 
 <div class="flex flex-col h-screen overflow-hidden bg-gradient-to-br from-gray-50 to-gray-200 dark:from-[#0a0a0f] dark:to-[#13131a] text-gray-900 dark:text-gray-100 transition-colors duration-300">
-  <Topbar bind:activeCategoryId {categories} {profile} {my_teams} onAddCategory={() => isCategoryModalOpen = true} onToggleTeam={() => isMobileSidebarOpen = true} />
+  <Topbar bind:activeCategoryIds {categories} {profile} {my_teams} onAddCategory={() => isCategoryModalOpen = true} onToggleTeam={() => isMobileSidebarOpen = true} />
   
   <div class="flex flex-col md:flex-row flex-1 overflow-hidden relative">
     <Board {filteredTasks} {people} onMove={handleTaskMove} onAddTask={openTaskModal} onTaskClick={handleTaskClick} />
@@ -120,5 +120,5 @@
   </div>
 </div>
 
-<TaskModal task={editingTask} bind:isOpen={isTaskModalOpen} status={newTaskStatus} categoryId={activeCategoryId} {categories} {people} />
+<TaskModal task={editingTask} bind:isOpen={isTaskModalOpen} status={newTaskStatus} categoryId={activeCategoryIds.length === 1 ? activeCategoryIds[0] : ''} {categories} {people} />
 <CategoryModal bind:isOpen={isCategoryModalOpen} {categories} />
