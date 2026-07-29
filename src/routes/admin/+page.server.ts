@@ -100,6 +100,24 @@ export const actions: Actions = {
     return { success: true };
   },
 
+  demoteFromAdmin: async ({ request, locals: { supabase, user } }) => {
+    if (!user) return fail(401, { error: 'Unauthorized' });
+    
+    const formData = await request.formData();
+    const targetUserId = formData.get('user_id') as string;
+    
+    if (!targetUserId) return fail(400, { error: 'Missing user ID' });
+    if (targetUserId === user.id) return fail(400, { error: 'Cannot remove your own admin access' });
+
+    const { error } = await supabase
+      .from('profiles')
+      .update({ role: 'user' })
+      .eq('id', targetUserId);
+      
+    if (error) return fail(500, { error: error.message });
+    return { success: true };
+  },
+
   removeUser: async ({ request, locals: { supabase, user } }) => {
     if (!user) return fail(401, { error: 'Unauthorized' });
     

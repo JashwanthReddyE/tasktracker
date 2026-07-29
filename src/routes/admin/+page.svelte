@@ -109,6 +109,15 @@
                       </button>
                     </form>
                   </div>
+                {:else if user.id !== data.profile?.id}
+                  <div class="flex items-center gap-4">
+                    <form method="POST" action="?/demoteFromAdmin" use:enhance>
+                      <input type="hidden" name="user_id" value={user.id} />
+                      <button class="text-xs font-semibold text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300">
+                        Remove Admin Access
+                      </button>
+                    </form>
+                  </div>
                 {/if}
               </div>
             {/each}
