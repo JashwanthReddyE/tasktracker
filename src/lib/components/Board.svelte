@@ -2,11 +2,12 @@
   import type { Task, Profile } from '$lib/types';
   import Card from './Card.svelte';
 
-  let { filteredTasks, people, onMove, onAddTask } = $props<{
+  let { filteredTasks, people, onMove, onAddTask, onTaskClick } = $props<{
     filteredTasks: Task[];
     people: Profile[];
     onMove: (taskId: string, newStatus: string) => void;
     onAddTask: (status: string) => void;
+    onTaskClick: (task: Task) => void;
   }>();
 
   const columns = [
@@ -88,7 +89,7 @@
           aria-label="{col.label} column"
         >
           {#each filteredTasks.filter(t => t.status === col.id) as task (task.id)}
-            <Card {task} {people} />
+            <Card {task} {people} onClick={() => onTaskClick(task)} />
           {/each}
           
           {#if filteredTasks.filter(t => t.status === col.id).length === 0}

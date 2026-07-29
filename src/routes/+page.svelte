@@ -35,9 +35,17 @@
   let newTaskStatus = $state('todo');
   let isCategoryModalOpen = $state(false);
   let isMobileSidebarOpen = $state(false);
+  let editingTask = $state<Task | null>(null);
 
   function openTaskModal(status: string) {
+    editingTask = null;
     newTaskStatus = status;
+    isTaskModalOpen = true;
+  }
+
+  function handleTaskClick(task: Task) {
+    editingTask = task;
+    newTaskStatus = task.status;
     isTaskModalOpen = true;
   }
 
@@ -107,10 +115,10 @@
   <Topbar bind:activeCategoryId {categories} {profile} {my_teams} onAddCategory={() => isCategoryModalOpen = true} onToggleTeam={() => isMobileSidebarOpen = true} />
   
   <div class="flex flex-col md:flex-row flex-1 overflow-hidden relative">
-    <Board {filteredTasks} {people} onMove={handleTaskMove} onAddTask={openTaskModal} />
+    <Board {filteredTasks} {people} onMove={handleTaskMove} onAddTask={openTaskModal} onTaskClick={handleTaskClick} />
     <Sidebar bind:activePersonFilter {people} bind:isOpen={isMobileSidebarOpen} />
   </div>
 </div>
 
-<TaskModal bind:isOpen={isTaskModalOpen} status={newTaskStatus} categoryId={activeCategoryId} {categories} {people} />
+<TaskModal task={editingTask} bind:isOpen={isTaskModalOpen} status={newTaskStatus} categoryId={activeCategoryId} {categories} {people} />
 <CategoryModal bind:isOpen={isCategoryModalOpen} {categories} />

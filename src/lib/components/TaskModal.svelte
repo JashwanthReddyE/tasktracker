@@ -1,14 +1,16 @@
 <script lang="ts">
   import { enhance } from '$app/forms';
-  import type { Category, Profile } from '$lib/types';
+  import type { Task, Category, Profile } from '$lib/types';
   
   let { 
+    task = null,
     isOpen = $bindable(), 
     status = 'todo', 
     categoryId = '',
     categories,
     people
   } = $props<{
+    task?: Task | null;
     isOpen: boolean;
     status: string;
     categoryId: string;
@@ -16,8 +18,22 @@
     people: Profile[];
   }>();
 
+  let title = $state('');
+  let notes = $state('');
+  let priority = $state('medium');
+  let due_date = $state('');
   let selectedPeople = $state<string[]>([]);
   
+  $effect(() => {
+    if (isOpen) {
+      title = task?.title || '';
+      notes = task?.notes || '';
+      priority = task?.priority || 'medium';
+      due_date = task?.due_date || '';
+      selectedPeople = task?.task_assignments?.map(ta => ta.user_id) || [];
+    }
+  });
+
   function togglePerson(id: string) {
     if (selectedPeople.includes(id)) {
       selectedPeople = selectedPeople.filter(p => p !== id);
@@ -36,49 +52,52 @@
   <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
     <div class="bg-white dark:bg-[#1c1c26] rounded-xl shadow-2xl w-full max-w-md overflow-hidden border border-gray-200 dark:border-white/10">
       <div class="px-6 py-4 border-b border-gray-100 dark:border-white/10 flex items-center justify-between">
-        <h2 class="text-lg font-bold text-gray-900 dark:text-white">Add New Task</h2>
+        <h2 class="text-lg font-bold text-gray-900 dark:text-white">{task ? 'Edit Task' : 'Add New Task'}</h2>
         <button class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors" onclick={close}>✕</button>
       </div>
       
-      <form method="POST" action="?/createTask" use:enhance={() => {
+      <form method="POST" action={task ? "?/updateTask" : "?/createTask"} use:enhance={() => {
         return async ({ result, update }) => {
           if (result.type === 'success') {
             close();
           } else if (result.type === 'failure') {
-            console.error('Failed to create task:', result.data);
-            alert('Failed to create task: ' + (result.data?.error || 'Unknown error'));
+            console.error('Failed to save task:', result.data);
+            alert('Failed to save task: ' + (result.data?.error || 'Unknown error'));
           }
           await update();
         };
       }} class="p-6 flex flex-col gap-4">
         
+        {#if task}
+          <input type="hidden" name="id" value={task.id} />
+        {/if}
         <input type="hidden" name="status" value={status} />
         <input type="hidden" name="category_id" value={categoryId} />
         <input type="hidden" name="people_ids" value={JSON.stringify(selectedPeople)} />
         
         <div>
           <label for="title" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Title</label>
-          <input type="text" id="title" name="title" required class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-transparent px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all dark:text-white" placeholder="What needs to be done?" />
+          <input type="text" id="title" name="title" bind:value={title} required class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-transparent px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all dark:text-white" placeholder="What needs to be done?" />
         </div>
         
         <div>
           <label for="notes" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Notes</label>
-          <textarea id="notes" name="notes" rows="3" class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-transparent px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all dark:text-white" placeholder="Additional details..."></textarea>
+          <textarea id="notes" name="notes" bind:value={notes} rows="3" class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-transparent px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all dark:text-white" placeholder="Additional details..."></textarea>
         </div>
 
         <div class="grid grid-cols-2 gap-4">
           <div>
             <label for="priority" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Priority</label>
-            <select id="priority" name="priority" class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-transparent px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all dark:text-white">
+            <select id="priority" name="priority" bind:value={priority} class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-transparent px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all dark:text-white">
               <option value="low" class="text-black">Low</option>
-              <option value="medium" class="text-black" selected>Medium</option>
+              <option value="medium" class="text-black">Medium</option>
               <option value="high" class="text-black">High</option>
             </select>
           </div>
           
           <div>
             <label for="due_date" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Due Date</label>
-            <input type="date" id="due_date" name="due_date" class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-transparent px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all dark:text-white [color-scheme:light] dark:[color-scheme:dark]" />
+            <input type="date" id="due_date" name="due_date" bind:value={due_date} class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-transparent px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all dark:text-white [color-scheme:light] dark:[color-scheme:dark]" />
           </div>
         </div>
 
@@ -102,9 +121,27 @@
           </div>
         {/if}
 
-        <div class="mt-4 flex justify-end gap-3">
-          <button type="button" class="px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors" onclick={close}>Cancel</button>
-          <button type="submit" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg shadow-sm transition-colors">Add Task</button>
+        <div class="mt-4 flex items-center {task ? 'justify-between' : 'justify-end'} gap-3">
+          {#if task}
+            <button type="button" class="px-4 py-2 text-sm font-bold text-red-500 hover:text-white hover:bg-red-500 rounded-lg transition-all border border-red-500 hover:border-transparent shadow-sm" onclick={() => {
+              if (confirm('Are you sure you want to delete this task?')) {
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = '?/deleteTask';
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = 'id';
+                input.value = task.id;
+                form.appendChild(input);
+                document.body.appendChild(form);
+                form.submit();
+              }
+            }}>Delete</button>
+          {/if}
+          <div class="flex gap-3">
+            <button type="button" class="px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors" onclick={close}>Cancel</button>
+            <button type="submit" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg shadow-sm transition-colors">{task ? 'Save Changes' : 'Add Task'}</button>
+          </div>
         </div>
       </form>
     </div>

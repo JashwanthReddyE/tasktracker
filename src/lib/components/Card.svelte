@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { Task, Profile } from '$lib/types';
 
-  let { task, people } = $props<{ task: Task; people: Profile[] }>();
+  let { task, people, onClick } = $props<{ task: Task; people: Profile[]; onClick: () => void }>();
 
   function handleDragStart(e: DragEvent) {
     if (e.dataTransfer) {
@@ -27,7 +27,11 @@
   draggable="true"
   ondragstart={handleDragStart}
   ondragend={handleDragEnd}
-  class="group bg-white dark:bg-[#1c1c26] rounded-xl p-3.5 border border-gray-200/60 dark:border-white/5 shadow-sm hover:shadow-md hover:border-gray-300 dark:hover:border-white/10 transition-all duration-200 cursor-grab active:cursor-grabbing relative overflow-hidden flex flex-col gap-1.5"
+  onclick={onClick}
+  role="button"
+  tabindex="0"
+  onkeydown={(e) => e.key === 'Enter' && onClick()}
+  class="group bg-white dark:bg-[#1c1c26] rounded-xl p-3.5 border border-gray-200/60 dark:border-white/5 shadow-sm hover:shadow-md hover:border-gray-300 dark:hover:border-white/10 transition-all duration-200 cursor-grab active:cursor-grabbing relative overflow-hidden flex flex-col gap-1.5 text-left"
 >
   <!-- Status Indicator (Ribbon) -->
   <div class="absolute top-0 left-0 w-1 h-full {task.status === 'todo' ? 'bg-orange-400' : task.status === 'working' ? 'bg-blue-500' : 'bg-green-500'}"></div>
