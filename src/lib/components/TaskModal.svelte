@@ -23,6 +23,7 @@
   let priority = $state('medium');
   let due_date = $state('');
   let selectedPeople = $state<string[]>([]);
+  let isConfirmingDelete = $state(false);
   
   $effect(() => {
     if (isOpen) {
@@ -31,6 +32,7 @@
       priority = task?.priority || 'medium';
       due_date = task?.due_date || '';
       selectedPeople = task?.task_assignments?.map(ta => ta.user_id) || [];
+      isConfirmingDelete = false;
     }
   });
 
@@ -45,6 +47,7 @@
   function close() {
     isOpen = false;
     selectedPeople = [];
+    isConfirmingDelete = false;
   }
 </script>
 
@@ -123,20 +126,25 @@
 
         <div class="mt-4 flex items-center {task ? 'justify-between' : 'justify-end'} gap-3">
           {#if task}
-            <button type="button" class="px-4 py-2 text-sm font-bold text-red-500 hover:text-white hover:bg-red-500 rounded-lg transition-all border border-red-500 hover:border-transparent shadow-sm" onclick={() => {
-              if (confirm('Are you sure you want to delete this task?')) {
-                const form = document.createElement('form');
-                form.method = 'POST';
-                form.action = '?/deleteTask';
-                const input = document.createElement('input');
-                input.type = 'hidden';
-                input.name = 'id';
-                input.value = task.id;
-                form.appendChild(input);
-                document.body.appendChild(form);
-                form.submit();
-              }
-            }}>Delete</button>
+            <div class="flex items-center gap-2">
+              {#if isConfirmingDelete}
+                <button type="button" class="px-3 py-1.5 text-xs font-bold text-white bg-red-600 hover:bg-red-700 rounded-lg shadow-sm transition-all animate-in fade-in slide-in-from-left-2" onclick={() => {
+                  const form = document.createElement('form');
+                  form.method = 'POST';
+                  form.action = '?/deleteTask';
+                  const input = document.createElement('input');
+                  input.type = 'hidden';
+                  input.name = 'id';
+                  input.value = task!.id;
+                  form.appendChild(input);
+                  document.body.appendChild(form);
+                  form.submit();
+                }}>Confirm Delete</button>
+                <button type="button" class="px-3 py-1.5 text-xs font-medium text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition-colors animate-in fade-in" onclick={() => isConfirmingDelete = false}>Cancel</button>
+              {#else}
+                <button type="button" class="px-4 py-2 text-sm font-bold text-red-500 hover:text-white hover:bg-red-500 rounded-lg transition-all border border-red-500 hover:border-transparent shadow-sm" onclick={() => isConfirmingDelete = true}>Delete</button>
+              {/if}
+            </div>
           {/if}
           <div class="flex gap-3">
             <button type="button" class="px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors" onclick={close}>Cancel</button>
