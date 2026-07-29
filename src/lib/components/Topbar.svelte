@@ -33,6 +33,14 @@
 
   <div class="flex items-center gap-2 overflow-x-auto flex-1 scrollbar-hide">
     <span class="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mr-1">Categories:</span>
+    
+    <button 
+      class="px-3 py-1.5 rounded-lg text-xs font-semibold tracking-wide transition-all duration-200 {activeCategoryIds.includes('') ? 'bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-300 shadow-sm' : 'text-gray-500 hover:text-gray-900 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-gray-100 dark:hover:bg-white/5'}"
+      onclick={() => toggleCategory('')}
+    >
+      No Category
+    </button>
+
     {#each categories as cat}
       <button 
         class="px-3 py-1.5 rounded-lg text-xs font-semibold tracking-wide transition-all duration-200 {activeCategoryIds.includes(cat.id) ? 'bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-300 shadow-sm' : 'text-gray-500 hover:text-gray-900 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-gray-100 dark:hover:bg-white/5'}"

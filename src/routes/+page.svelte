@@ -52,7 +52,7 @@
   // Derived state for filtering
   let filteredTasks = $derived(
     tasks.filter(t => 
-      (activeCategoryIds.length === 0 || activeCategoryIds.includes(t.category_id)) &&
+      (activeCategoryIds.length === 0 || activeCategoryIds.includes(t.category_id || '')) &&
       (activePersonFilter === '' || t.task_assignments?.some(a => a.user_id === activePersonFilter))
     )
   );
