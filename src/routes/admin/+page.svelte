@@ -49,21 +49,29 @@
                       <div class="text-xs text-blue-500 dark:text-blue-400 mt-1">Requested to join: {team?.name || 'Unknown Team'}</div>
                     {/if}
                   </div>
-                  <div class="flex items-center gap-3">
+                  <div class="flex items-center gap-3 bg-gray-50/50 dark:bg-black/20 p-1.5 rounded-2xl border border-gray-100 dark:border-white/5 mt-3 sm:mt-0">
                     <form method="POST" action="?/approveUser" use:enhance class="flex items-center gap-2">
                       <input type="hidden" name="user_id" value={user.id} />
-                      <select name="team_id" class="text-sm rounded-lg border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 px-2 py-1 outline-none text-gray-700 dark:text-gray-300">
-                        {#each data.teams as team}
-                          <option value={team.id} selected={team.id === user.requested_team_id}>{team.name}</option>
-                        {/each}
-                      </select>
-                      <button class="px-4 py-2 rounded-lg bg-green-500 hover:bg-green-600 text-white text-sm font-semibold transition-colors shadow-lg shadow-green-500/20">
+                      <div class="relative flex items-center group">
+                        <select name="team_id" class="appearance-none text-sm font-medium rounded-xl border border-transparent bg-white dark:bg-[#1a1a24] px-4 py-2 pr-9 outline-none text-gray-700 dark:text-gray-200 group-hover:border-gray-200 dark:group-hover:border-white/10 focus:ring-2 focus:ring-green-500/50 focus:border-transparent transition-all shadow-sm cursor-pointer min-w-[130px]">
+                          {#each data.teams as team}
+                            <option value={team.id} selected={team.id === user.requested_team_id}>{team.name}</option>
+                          {/each}
+                        </select>
+                        <div class="absolute right-3 pointer-events-none text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-200 transition-colors">
+                          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </div>
+                      </div>
+                      <button class="px-4 py-2 rounded-xl bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-400 hover:to-emerald-500 text-white text-sm font-bold transition-all shadow-lg shadow-green-500/25 hover:shadow-green-500/40 hover:-translate-y-0.5">
                         Approve
                       </button>
                     </form>
+                    
+                    <div class="w-px h-6 bg-gray-200 dark:bg-white/10 hidden sm:block"></div>
+                    
                     <form method="POST" action="?/denyUser" use:enhance>
                       <input type="hidden" name="user_id" value={user.id} />
-                      <button class="px-4 py-2 rounded-lg bg-red-500 hover:bg-red-600 text-white text-sm font-semibold transition-colors shadow-lg shadow-red-500/20">
+                      <button class="px-4 py-2 rounded-xl bg-white dark:bg-[#1a1a24] hover:bg-red-50 dark:hover:bg-red-500/10 text-red-500 text-sm font-bold transition-all border border-gray-100 dark:border-white/5 shadow-sm hover:border-red-200 dark:hover:border-red-500/20">
                         Deny
                       </button>
                     </form>
